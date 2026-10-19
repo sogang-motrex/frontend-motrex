@@ -17,8 +17,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # rewrites()는 빌드 시점에 평가되므로 BACKEND_URL은 빌드 인자로 넘겨야 한다.
-#   docker build --build-arg BACKEND_URL=http://backend:8080 -t frontend-motrex .
-ARG BACKEND_URL=http://localhost:8080
+# 백엔드 컨테이너와 같은 Docker 네트워크에 붙어서, 서비스(컨테이너) 이름 backend 로 접근한다.
+# 컨테이너 안의 localhost는 컨테이너 자신이므로 localhost:8080 으로는 백엔드에 닿지 않는다.
+ARG BACKEND_URL=http://backend:8080
 ENV BACKEND_URL=${BACKEND_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
