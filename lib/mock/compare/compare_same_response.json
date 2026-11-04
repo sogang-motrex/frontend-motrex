@@ -1,0 +1,1053 @@
+{
+ "docId": "KR101481289B1",
+ "claimNo": 1,
+ "claimRef": "KR101481289B1#C1",
+ "claimText": "크러시패드의 수납공간속에 설치되고 전후방향으로 이동하는 벨트가 감겨진 벨트가이더;\n상기 벨트가이더에 전후방향으로 고정되게 설치된 가이드레일;\n상기 가이드레일과 결합되어서 가이드레일을 따라 전후방향으로 이동하고 상기 벨트와 결합되어서 벨트와 함께 이동하며 에이브이엔 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된 모니터힌지; 및\n상기 벨트가 전후방향으로 이동할 수 있도록 모터의 동력을 상기 벨트가이더로 전달할 수 있게 설치된 동력전달기어를 포함하고;\n상기 에이브이엔 모니터가 상기 수납공간으로부터 인출이 완료된 오픈 상태시 상기 모니터힌지의 밑면을 탄력적으로 지지해서 상기 에이브이엔 모니터의 유동을 방지할 수 있도록 상기 벨트가이더에 설치된 텐션모듈;을 더 포함하는 것을 특징으로 하는 차량용 에이브이엔 모니터 작동장치.",
+ "level": "L1",
+ "retrieval": "HYBRID",
+ "summary": {
+  "SAME": 4,
+  "DIFF": 0,
+  "CHECK": 1
+ },
+ "rows": [
+  {
+   "elementId": "E1",
+   "elementLabel": "1a",
+   "kind": "ELEMENT",
+   "text": "크러시패드의 수납공간속에 설치되고 전후방향으로 이동하는 벨트가 감겨진 벨트가이더",
+   "start": 0,
+   "end": 44,
+   "verdict": "SAME",
+   "label": "확인",
+   "counterpart": "벨트가이더",
+   "counterpartStatus": "STATED",
+   "designEvidence": [
+    {
+     "factId": "IN-1",
+     "source": "DESCRIPTION",
+     "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+     "start": 0,
+     "end": 57
+    },
+    {
+     "factId": "IN-2",
+     "source": "DESCRIPTION",
+     "quote": "벨트가이더에는 가이드레일이 전후방향으로 고정 설치된다.",
+     "start": 58,
+     "end": 88
+    },
+    {
+     "factId": "IN-5",
+     "source": "DESCRIPTION",
+     "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+     "start": 199,
+     "end": 258
+    },
+    {
+     "factId": "IN-3",
+     "source": "DESCRIPTION",
+     "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+     "start": 89,
+     "end": 152
+    }
+   ],
+   "citations": [
+    {
+     "ref": "KR101481289B1#C1",
+     "type": "CLAIM",
+     "num": "1",
+     "quote": "크러시패드의 수납공간속에 설치되고 전후방향으로 이동하는 벨트가 감겨진 벨트가이더",
+     "start": 0,
+     "end": 44,
+     "status": "match"
+    }
+   ],
+   "aiNote": "조건 4개: 확인 4",
+   "notices": [],
+   "conditions": [
+    {
+     "conditionId": "E1-c1",
+     "type": "EXISTS",
+     "claimQuote": "벨트가이더",
+     "start": 39,
+     "end": 44,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-1",
+       "source": "DESCRIPTION",
+       "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+       "start": 0,
+       "end": 57
+      },
+      {
+       "factId": "IN-2",
+       "source": "DESCRIPTION",
+       "quote": "벨트가이더에는 가이드레일이 전후방향으로 고정 설치된다.",
+       "start": 58,
+       "end": 88
+      },
+      {
+       "factId": "IN-5",
+       "source": "DESCRIPTION",
+       "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+       "start": 199,
+       "end": 258
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "청구항의 '벨트가이더' 존재 조건은 IN-1, IN-2, IN-5 문장 모두에서 '벨트가이더'라는 부품이 명시적으로 언급되어 설치 및 작동 주체로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "IN-1 문장은 벨트가이더가 크래시패드 내부 수납공간에 설치됨을, IN-2 문장은 가이드레일이 전후방향으로 고정 설치됨을, IN-5 문장은 동력전달기어를 통해 벨트가이더로 동력이 전달됨을 각각 명시하여 벨트가이더의 존재와 관련 구조를 모두 뒷받침한다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E1-c2",
+     "type": "ATTACH",
+     "claimQuote": "크러시패드의 수납공간속에 설치되고",
+     "start": 0,
+     "end": 18,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-1",
+       "source": "DESCRIPTION",
+       "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+       "start": 0,
+       "end": 57
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-1 에서 '크래시패드 내부 수납공간'에 '벨트가이더'가 '설치'된다는 내용이 청구항의 모든 요소 (주어, 술어, 위치) 를 명시적으로 포함하고 있습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-1]은 '크래시패드 내부 수납공간에 벨트가이더가 설치되고'라는 서술을 통해 주체인 벨트가이더가 크러시패드의 수납공간속에 설치된다는 조건을 모두 명시하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E1-c3",
+     "type": "MOVE",
+     "claimQuote": "전후방향으로 이동하는",
+     "start": 19,
+     "end": 30,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      },
+      {
+       "factId": "IN-1",
+       "source": "DESCRIPTION",
+       "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+       "start": 0,
+       "end": 57
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-1 에서 '벨트'가 '전후방향으로 이동한다'고 명시되어 있어, 청구항의 주어(벨트), 동작(이동), 방향(전후방향) 모든 요소가 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "IN-1 문장은 '벨트가이더'에 '벨트가 감겨 있다'고 하여 주체인 벨트의 존재를 확인하고, IN-3 문장은 '벨트와 결합되어 벨트와 함께 이동한다'고 하여 전후방향으로 이동하는 술어와 방향을 명시적으로 기술하고 있다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E1-c4",
+     "type": "WOUND",
+     "claimQuote": "벨트가 감겨진",
+     "start": 31,
+     "end": 38,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-1",
+       "source": "DESCRIPTION",
+       "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+       "start": 0,
+       "end": 57
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-1에서 '벨트'라는 주어 부품과 '감겨 있다'라는 술어 관계가 명시적으로 기술되어 청구항의 모든 요소를 충족합니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-1]이 '벨트가 감겨 있다'라고 명시하여 주어진 조건의 주어(벨트)와 술어(감기)를 모두 지지합니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    }
+   ]
+  },
+  {
+   "elementId": "E2",
+   "elementLabel": "1b",
+   "kind": "ELEMENT",
+   "text": "상기 벨트가이더에 전후방향으로 고정되게 설치된 가이드레일",
+   "start": 46,
+   "end": 77,
+   "verdict": "SAME",
+   "label": "확인",
+   "counterpart": "가이드레일",
+   "counterpartStatus": "STATED",
+   "designEvidence": [
+    {
+     "factId": "IN-2",
+     "source": "DESCRIPTION",
+     "quote": "벨트가이더에는 가이드레일이 전후방향으로 고정 설치된다.",
+     "start": 58,
+     "end": 88
+    },
+    {
+     "factId": "IN-3",
+     "source": "DESCRIPTION",
+     "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+     "start": 89,
+     "end": 152
+    }
+   ],
+   "citations": [
+    {
+     "ref": "KR101481289B1#C1",
+     "type": "CLAIM",
+     "num": "1",
+     "quote": "상기 벨트가이더에 전후방향으로 고정되게 설치된 가이드레일",
+     "start": 46,
+     "end": 77,
+     "status": "match"
+    }
+   ],
+   "aiNote": "조건 2개: 확인 2",
+   "notices": [],
+   "conditions": [
+    {
+     "conditionId": "E2-c1",
+     "type": "EXISTS",
+     "claimQuote": "가이드레일",
+     "start": 72,
+     "end": 77,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-2",
+       "source": "DESCRIPTION",
+       "quote": "벨트가이더에는 가이드레일이 전후방향으로 고정 설치된다.",
+       "start": 58,
+       "end": 88
+      },
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "청구항의 '가이드레일' 존재 여부는 IN-2 문장에서 가이드레일이 전후방향으로 고정 설치된다고 명시되어 있고, IN-3 문장에서도 가이드레일이 모니터힌지와 결합되어 이동의 기준이 된다고 기술되어 있어 모든 요소가 확인됩니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-2] 에서 '가이드레일'이 전후방향으로 고정 설치됨을 명시하여, 가이드레일의 존재를 뒷받침합니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E2-c2",
+     "type": "ATTACH",
+     "claimQuote": "상기 벨트가이더에 전후방향으로 고정되게 설치된",
+     "start": 46,
+     "end": 71,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-2",
+       "source": "DESCRIPTION",
+       "quote": "벨트가이더에는 가이드레일이 전후방향으로 고정 설치된다.",
+       "start": 58,
+       "end": 88
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 [IN-2] 에서 '가이드레일'이 '벨트가이더'에 '전후방향으로 고정 설치'된다는 내용이 청구항의 모든 요소 (주어, 관계, 상대 부품, 부위, 방식, 시점) 를 명시적으로 포함하고 있습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-2]은 가이드레일이 벨트가이더에 전후방향으로 고정 설치된다는 주어진 조건의 모든 요소를 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    }
+   ]
+  },
+  {
+   "elementId": "E3",
+   "elementLabel": "1c",
+   "kind": "ELEMENT",
+   "text": "상기 가이드레일과 결합되어서 가이드레일을 따라 전후방향으로 이동하고 상기 벨트와 결합되어서 벨트와 함께 이동하며 에이브이엔 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된 모니터힌지",
+   "start": 79,
+   "end": 185,
+   "verdict": "SAME",
+   "label": "확인",
+   "counterpart": "모니터힌지",
+   "counterpartStatus": "STATED",
+   "designEvidence": [
+    {
+     "factId": "IN-3",
+     "source": "DESCRIPTION",
+     "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+     "start": 89,
+     "end": 152
+    },
+    {
+     "factId": "IN-4",
+     "source": "DESCRIPTION",
+     "quote": "모니터힌지에는 AVN 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된다.",
+     "start": 153,
+     "end": 198
+    },
+    {
+     "factId": "IN-6",
+     "source": "DESCRIPTION",
+     "quote": "모니터가 인출된 상태에서 모니터힌지의 밑면을 탄력적으로 지지하는 부품은 없으며, 모니터 흔들림은 고무 댐퍼가 모니터 뒷면을 눌러 줄인다.",
+     "start": 259,
+     "end": 335
+    }
+   ],
+   "citations": [
+    {
+     "ref": "KR101481289B1#C1",
+     "type": "CLAIM",
+     "num": "1",
+     "quote": "상기 가이드레일과 결합되어서 가이드레일을 따라 전후방향으로 이동하고 상기 벨트와 결합되어서 벨트와 함께 이동하며 에이브이엔 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된 모니터힌지",
+     "start": 79,
+     "end": 185,
+     "status": "match"
+    }
+   ],
+   "aiNote": "조건 7개: 확인 7",
+   "notices": [],
+   "conditions": [
+    {
+     "conditionId": "E3-c1",
+     "type": "EXISTS",
+     "claimQuote": "모니터힌지",
+     "start": 180,
+     "end": 185,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      },
+      {
+       "factId": "IN-4",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지에는 AVN 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된다.",
+       "start": 153,
+       "end": 198
+      },
+      {
+       "factId": "IN-6",
+       "source": "DESCRIPTION",
+       "quote": "모니터가 인출된 상태에서 모니터힌지의 밑면을 탄력적으로 지지하는 부품은 없으며, 모니터 흔들림은 고무 댐퍼가 모니터 뒷면을 눌러 줄인다.",
+       "start": 259,
+       "end": 335
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "청구항의 '모니터힌지' 존재 조건은 IN-4, IN-3, IN-6 문장 모두에서 '모니터힌지'라는 부품이 명시적으로 언급되어 그 존재가 확인됩니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "IN-3, IN-4, 및 IN-6 문장 모두에서 '모니터힌지'가 주어로 명시적으로 언급되어 존재함이 확인됩니다."
+      }
+     ],
+     "flags": [
+      "NEGATION_CUE"
+     ],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c2",
+     "type": "COUPLE",
+     "claimQuote": "상기 가이드레일과 결합되어서",
+     "start": 79,
+     "end": 94,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-3 에서 '모니터힌지'가 '가이드레일'과 '결합되어' 있다는 조건의 모든 요소 (주어, 관계, 상대) 가 명시적으로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-3]은 주어인 '모니터힌지'가 상대인 '가이드레일'과 '결합되어' 있다는 조건을 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c3",
+     "type": "MOVE",
+     "claimQuote": "가이드레일을 따라 전후방향으로 이동하고",
+     "start": 95,
+     "end": 116,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "문장 IN-3 에서 '모니터힌지'가 '가이드레일'을 따라 '전후방향'으로 '이동'한다는 조건의 모든 요소가 명시적으로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-3]은 모니터힌지가 가이드레일을 따라 전후방향으로 이동한다는 주어진 조건의 모든 요소(주어, 술어, 경로, 방향)를 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c4",
+     "type": "COUPLE",
+     "claimQuote": "상기 벨트와 결합되어서",
+     "start": 117,
+     "end": 129,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 [IN-3] 에서 '모니터힌지'가 '벨트'와 '결합되어' 있으며, 이를 통해 '상기 벨트와 결합되어서'라는 조건이 명시적으로 확인됩니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-3]은 주어인 '모니터힌지'가 상대인 '벨트'와 '결합되어' 있다는 조건을 모두 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c5",
+     "type": "MOVE",
+     "claimQuote": "벨트와 함께 이동하며",
+     "start": 130,
+     "end": 141,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-3 에서 '모니터힌지'가 '벨트'와 결합되어 '벨트와 함께 이동한다'고 명시되어 있어, 청구항의 주어, 상대 부품, 그리고 '함께 이동'하는 관계가 모두 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-3]은 주어인 '모니터힌지'가 '벨트'와 결합되어 '벨트와 함께 이동한다'는 조건을 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c6",
+     "type": "COUPLE",
+     "claimQuote": "에이브이엔 모니터와 결합된",
+     "start": 142,
+     "end": 156,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-4",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지에는 AVN 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된다.",
+       "start": 153,
+       "end": 198
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-4 에서 '연결브라켓의 일단'이 'AVN 모니터'와 '결합된' 상태임을 명시적으로 기술하고 있어, 청구항의 주어, 상대 부품, 및 결합 관계가 모두 확인됩니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-4]은 '연결브라켓의 일단'이 'AVN 모니터'와 '결합'된다는 주어진 조건의 모든 요소를 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [
+      "NEGATION_CUE"
+     ],
+     "questionId": null
+    },
+    {
+     "conditionId": "E3-c7",
+     "type": "COUPLE",
+     "claimQuote": "연결브라켓의 일단이 회전 가능하게 결합된",
+     "start": 157,
+     "end": 179,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-4",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지에는 AVN 모니터와 결합된 연결브라켓의 일단이 회전 가능하게 결합된다.",
+       "start": 153,
+       "end": 198
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-4에서 '연결브라켓의 일단'이 '모니터힌지'에 '회전 가능하게 결합'된다는 조건의 모든 요소(주어, 부위, 관계, 방식)가 명시적으로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-4]은 '연결브라켓의 일단'이 '모니터힌지'에 '회전 가능하게 결합된다'고 명시하여 주체, 관계, 부위, 방식의 모든 요소를 충족합니다."
+      }
+     ],
+     "flags": [
+      "NEGATION_CUE"
+     ],
+     "questionId": null
+    }
+   ]
+  },
+  {
+   "elementId": "E4",
+   "elementLabel": "1d",
+   "kind": "ELEMENT",
+   "text": "상기 벨트가 전후방향으로 이동할 수 있도록 모터의 동력을 상기 벨트가이더로 전달할 수 있게 설치된 동력전달기어",
+   "start": 189,
+   "end": 250,
+   "verdict": "SAME",
+   "label": "확인",
+   "counterpart": "동력전달기어",
+   "counterpartStatus": "STATED",
+   "designEvidence": [
+    {
+     "factId": "IN-5",
+     "source": "DESCRIPTION",
+     "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+     "start": 199,
+     "end": 258
+    },
+    {
+     "factId": "IN-3",
+     "source": "DESCRIPTION",
+     "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+     "start": 89,
+     "end": 152
+    },
+    {
+     "factId": "IN-1",
+     "source": "DESCRIPTION",
+     "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+     "start": 0,
+     "end": 57
+    }
+   ],
+   "citations": [
+    {
+     "ref": "KR101481289B1#C1",
+     "type": "CLAIM",
+     "num": "1",
+     "quote": "상기 벨트가 전후방향으로 이동할 수 있도록 모터의 동력을 상기 벨트가이더로 전달할 수 있게 설치된 동력전달기어",
+     "start": 189,
+     "end": 250,
+     "status": "match"
+    }
+   ],
+   "aiNote": "조건 4개: 확인 4",
+   "notices": [],
+   "conditions": [
+    {
+     "conditionId": "E4-c1",
+     "type": "EXISTS",
+     "claimQuote": "동력전달기어",
+     "start": 244,
+     "end": 250,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-5",
+       "source": "DESCRIPTION",
+       "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+       "start": 199,
+       "end": 258
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "청구항의 '동력전달기어' 존재 조건은 IN-5 문장에서 '벨트가이더에 설치된 동력전달기어'라는 표현으로 명시적으로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-5] 에서 '동력전달기어'가 벨트가이더에 설치되어 있다는 사실을 명시하여 주어진 조건을 충족한다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E4-c2",
+     "type": "MOVE",
+     "claimQuote": "상기 벨트가 전후방향으로 이동할 수 있도록",
+     "start": 189,
+     "end": 212,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-3",
+       "source": "DESCRIPTION",
+       "quote": "모니터힌지는 가이드레일과 결합되어 가이드레일을 따라 전후방향으로 이동하고, 벨트와 결합되어 벨트와 함께 이동한다.",
+       "start": 89,
+       "end": 152
+      },
+      {
+       "factId": "IN-1",
+       "source": "DESCRIPTION",
+       "quote": "크래시패드 내부 수납공간에 벨트가이더가 설치되고, 벨트가이더는 전후방향으로 이동하며 벨트가 감겨 있다.",
+       "start": 0,
+       "end": 57
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "IN-1 문장에서 '벨트가이더'가 전후방향으로 이동하며 '벨트'가 감겨 있다는 사실과, IN-3 문장에서 '벨트'가 가이드레일을 따라 전후방향으로 이동한다는 기술이 결합되어, 벨트가 전후방향으로 이동할 수 있다는 조건이 모두 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-1]은 '벨트가이더'에 '벨트가 감겨 있다'고 명시하여 주체인 벨트를 확인하고, '전후방향으로 이동하며'라는 서술어로 전후방향 이동 기능을 직접적으로 지지합니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E4-c3",
+     "type": "TRANSMIT",
+     "claimQuote": "모터의 동력을 상기 벨트가이더로 전달할 수 있게",
+     "start": 213,
+     "end": 239,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-5",
+       "source": "DESCRIPTION",
+       "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+       "start": 199,
+       "end": 258
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 [IN-5] 에서 '모터의 동력'이 '동력전달기어'를 통해 '벨트가이더'로 '전달'된다는 모든 요소가 명시적으로 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-5]은 동력전달기어가 모터의 동력을 벨트가이더로 전달하여 벨트를 이동시킨다는 내용으로, 주어진 조건의 모든 요소(주어, 술어, 대상, 수단)를 명시적으로 기술하고 있습니다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    },
+    {
+     "conditionId": "E4-c4",
+     "type": "ATTACH",
+     "claimQuote": "설치된",
+     "start": 240,
+     "end": 243,
+     "status": "SUPPORTED",
+     "statusKo": "확인",
+     "evidence": [
+      {
+       "factId": "IN-5",
+       "source": "DESCRIPTION",
+       "quote": "모터의 동력은 벨트가이더에 설치된 동력전달기어를 통해 벨트가이더로 전달되어 벨트를 전후방향으로 이동시킨다.",
+       "start": 199,
+       "end": 258
+      }
+     ],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "SUPPORTED",
+       "reason": "근거 문장 IN-5에서 '동력전달기어'가 '벨트가이더'에 '설치된' 상태로 기술되어, 청구항의 주어 부품과 설치 관계가 모두 확인되었습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "SUPPORTED",
+       "reason": "문장 [IN-5]은 동력전달기어가 벨트가이더에 설치된다는 주어진 조건의 주어와 술어(설치됨)를 모두 명시적으로 기술하고 있다."
+      }
+     ],
+     "flags": [],
+     "questionId": null
+    }
+   ]
+  },
+  {
+   "elementId": "E5",
+   "elementLabel": "1e",
+   "kind": "ELEMENT",
+   "text": "상기 에이브이엔 모니터가 상기 수납공간으로부터 인출이 완료된 오픈 상태시 상기 모니터힌지의 밑면을 탄력적으로 지지해서 상기 에이브이엔 모니터의 유동을 방지할 수 있도록 상기 벨트가이더에 설치된 텐션모듈",
+   "start": 258,
+   "end": 370,
+   "verdict": "CHECK",
+   "label": "미확인",
+   "counterpart": null,
+   "counterpartStatus": "NONE",
+   "designEvidence": [],
+   "citations": [
+    {
+     "ref": "KR101481289B1#C1",
+     "type": "CLAIM",
+     "num": "1",
+     "quote": "상기 에이브이엔 모니터가 상기 수납공간으로부터 인출이 완료된 오픈 상태시 상기 모니터힌지의 밑면을 탄력적으로 지지해서 상기 에이브이엔 모니터의 유동을 방지할 수 있도록 상기 벨트가이더에 설치된 텐션모듈",
+     "start": 258,
+     "end": 370,
+     "status": "match"
+    }
+   ],
+   "aiNote": "조건 5개: 근거 부족 5 / 청구항 조건이 요구하는 '수납공간으로부터 인출이 완료된 오픈 상태'라는 시점과 상태에 대한 명시적인 기술이 근거 문장에 포함되어 있지 않습니다.",
+   "notices": [],
+   "conditions": [
+    {
+     "conditionId": "E5-c1",
+     "type": "EXISTS",
+     "claimQuote": "텐션모듈",
+     "start": 366,
+     "end": 370,
+     "status": "INSUFFICIENT",
+     "statusKo": "근거 부족",
+     "evidence": [],
+     "votes": [],
+     "flags": [
+      "NO_ALIGNED_ENTITY"
+     ],
+     "questionId": "1e-Q1"
+    },
+    {
+     "conditionId": "E5-c2",
+     "type": "TIMING",
+     "claimQuote": "상기 에이브이엔 모니터가 상기 수납공간으로부터 인출이 완료된 오픈 상태시",
+     "start": 258,
+     "end": 298,
+     "status": "INSUFFICIENT",
+     "statusKo": "근거 부족",
+     "evidence": [],
+     "votes": [
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b",
+       "status": "INSUFFICIENT",
+       "reason": "청구항 조건이 요구하는 '수납공간으로부터 인출이 완료된 오픈 상태'라는 시점과 상태에 대한 명시적인 기술이 근거 문장에 포함되어 있지 않습니다."
+      },
+      {
+       "judge": "internal:huihui_ai/qwen3.5-abliterated:27b(alt)",
+       "status": "INSUFFICIENT",
+       "reason": "에이브이엔 모니터가 수납공간으로부터 인출된 상태에 대한 언급은 있으나, 인출이 '완료'된 시점이나 '오픈 상태'라는 구체적인 타이밍 조건을 명시적으로 기술한 문장이 없습니다."
+      }
+     ],
+     "flags": [
+      "NEGATION_CUE"
+     ],
+     "questionId": "1e-Q2"
+    },
+    {
+     "conditionId": "E5-c3",
+     "type": "SUPPORT",
+     "claimQuote": "상기 모니터힌지의 밑면을 탄력적으로 지지해서",
+     "start": 299,
+     "end": 323,
+     "status": "INSUFFICIENT",
+     "statusKo": "근거 부족",
+     "evidence": [],
+     "votes": [],
+     "flags": [
+      "NO_ALIGNED_ENTITY"
+     ],
+     "questionId": "1e-Q3"
+    },
+    {
+     "conditionId": "E5-c4",
+     "type": "FUNCTION",
+     "claimQuote": "상기 에이브이엔 모니터의 유동을 방지할 수 있도록",
+     "start": 324,
+     "end": 351,
+     "status": "INSUFFICIENT",
+     "statusKo": "근거 부족",
+     "evidence": [],
+     "votes": [],
+     "flags": [
+      "NO_ALIGNED_ENTITY"
+     ],
+     "questionId": "1e-Q4"
+    },
+    {
+     "conditionId": "E5-c5",
+     "type": "ATTACH",
+     "claimQuote": "상기 벨트가이더에 설치된",
+     "start": 352,
+     "end": 365,
+     "status": "INSUFFICIENT",
+     "statusKo": "근거 부족",
+     "evidence": [],
+     "votes": [],
+     "flags": [
+      "NO_ALIGNED_ENTITY"
+     ],
+     "questionId": "1e-Q5"
+    }
+   ]
+  }
+ ],
+ "checkItems": [
+  {
+   "questionId": "1e-Q1",
+   "elementLabel": "1e",
+   "conditionIds": [
+    "E5-c1"
+   ],
+   "kind": "CONDITION",
+   "text": "기술 설명에서 '텐션모듈'에 해당하는 내용을 확인하지 못했습니다. 텐션모듈의 해당 구성을 설명해 주세요."
+  },
+  {
+   "questionId": "1e-Q2",
+   "elementLabel": "1e",
+   "conditionIds": [
+    "E5-c2"
+   ],
+   "kind": "CONDITION",
+   "text": "AVN 모니터는 '상기 에이브이엔 모니터가 상기 수납공간으로부터 인출이 완료된 오픈 상태시'에만 작동합니까, 항상 작동합니까?"
+  },
+  {
+   "questionId": "1e-Q3",
+   "elementLabel": "1e",
+   "conditionIds": [
+    "E5-c3"
+   ],
+   "kind": "CONDITION",
+   "text": "텐션모듈이 실제로 접촉·지지하는 부위는 모니터힌지의 밑면입니까?"
+  },
+  {
+   "questionId": "1e-Q4",
+   "elementLabel": "1e",
+   "conditionIds": [
+    "E5-c4"
+   ],
+   "kind": "CONDITION",
+   "text": "기술 설명에서 '상기 에이브이엔 모니터의 유동을 방지할 수 있도록'에 해당하는 내용을 확인하지 못했습니다. 텐션모듈의 해당 구성을 설명해 주세요."
+  },
+  {
+   "questionId": "1e-Q5",
+   "elementLabel": "1e",
+   "conditionIds": [
+    "E5-c5"
+   ],
+   "kind": "CONDITION",
+   "text": "텐션모듈은 어느 부품에 설치·고정됩니까? 청구항은 '상기 벨트가이더에 설치된'을 요구합니다."
+  }
+ ],
+ "alignment": [
+  {
+   "claimName": "벨트가이더",
+   "inputName": "벨트가이더",
+   "status": "STATED"
+  },
+  {
+   "claimName": "가이드레일",
+   "inputName": "가이드레일",
+   "status": "STATED"
+  },
+  {
+   "claimName": "모니터힌지",
+   "inputName": "모니터힌지",
+   "status": "STATED"
+  },
+  {
+   "claimName": "동력전달기어",
+   "inputName": "동력전달기어",
+   "status": "STATED"
+  },
+  {
+   "claimName": "텐션모듈",
+   "inputName": null,
+   "status": "NONE"
+  },
+  {
+   "claimName": "크러시패드의 수납공간속",
+   "inputName": "크래시패드 내부 수납공간",
+   "status": "ASSUMED"
+  },
+  {
+   "claimName": "벨트",
+   "inputName": "벨트",
+   "status": "STATED"
+  },
+  {
+   "claimName": "에이브이엔 모니터",
+   "inputName": "AVN 모니터",
+   "status": "ASSUMED"
+  },
+  {
+   "claimName": "연결브라켓의 일단",
+   "inputName": "연결브라켓의 일단",
+   "status": "STATED"
+  },
+  {
+   "claimName": "모터의 동력",
+   "inputName": "모터의 동력",
+   "status": "STATED"
+  },
+  {
+   "claimName": "수납공간",
+   "inputName": "크래시패드 내부 수납공간",
+   "status": "ASSUMED"
+  }
+ ],
+ "alignmentNotes": [],
+ "answers": [],
+ "generator": {
+  "route": "internal",
+  "model": "huihui_ai/qwen3.5-abliterated:27b"
+ },
+ "judge": {
+  "j1": {
+   "route": "internal",
+   "model": "huihui_ai/qwen3.5-abliterated:27b"
+  },
+  "j2": {
+   "route": "internal",
+   "model": "huihui_ai/qwen3.5-abliterated:27b"
+  },
+  "independence": "LOW",
+  "promptVersion": "cgv_judge_v2+cgv_judge_v2b"
+ },
+ "llmCalls": 36,
+ "elapsedMs": 314234,
+ "cached": false
+}

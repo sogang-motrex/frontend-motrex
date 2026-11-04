@@ -1,0 +1,81 @@
+{
+  "docId": "KR101481289B1",
+  "claimNo": 1,
+  "techDescription": "크래시패드 내부 수납공간에 디스플레이를 수납하고, 필요할 때 위쪽으로 인출한다. 모터로 회전하는 피니언이 랙을 움직여, 슬라이더가 슬라이드 레일을 따라 전후로 이동한다. 디스플레이 하단은 힌지 브라켓으로 슬라이더에 회전 가능하게 연결된다. 인출이 끝난 위치에서는 판스프링이 슬라이더를 눌러 디스플레이 흔들림을 줄인다.",
+  "sensitive": false,
+  "level": "L1",
+  "retrieval": "HYBRID",
+  "alignment": [
+    {
+      "claimName": "벨트가이더",
+      "inputName": null,
+      "status": "NONE"
+    },
+    {
+      "claimName": "가이드레일",
+      "inputName": "슬라이드 레일",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "모니터힌지",
+      "inputName": "힌지 브라켓",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "동력전달기어",
+      "inputName": "피니언",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "텐션모듈",
+      "inputName": "판스프링",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "크러시패드의 수납공간속",
+      "inputName": "크래시패드 내부 수납공간",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "벨트",
+      "inputName": null,
+      "status": "NONE"
+    },
+    {
+      "claimName": "에이브이엔 모니터",
+      "inputName": "디스플레이",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "연결브라켓의 일단",
+      "inputName": "힌지 브라켓",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "모터의 동력",
+      "inputName": "모터",
+      "status": "ASSUMED"
+    },
+    {
+      "claimName": "수납공간",
+      "inputName": "크래시패드 내부 수납공간",
+      "status": "STATED"
+    }
+  ],
+  "answers": [
+    {
+      "questionId": "1c-Q5",
+      "conditionIds": [
+        "E3-c6"
+      ],
+      "answer": "힌지 브라켓의 다른 쪽 끝은 디스플레이 하단에 결합되어, 디스플레이가 힌지 브라켓을 중심으로 회전한다."
+    },
+    {
+      "questionId": "1e-Q2",
+      "conditionIds": [
+        "E5-c3"
+      ],
+      "answer": "판스프링은 힌지 브라켓의 밑면이 아니라 슬라이더 윗면을 눌러 지지한다."
+    }
+  ]
+}
