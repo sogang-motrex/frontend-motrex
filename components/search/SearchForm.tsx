@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type KeyboardEvent } from "react";
+import ImageDescribe from "@/components/search/ImageDescribe";
 import { ApiError } from "@/lib/api";
 import { COUNTRY_OPTIONS, KIND_OPTIONS, runSearch, type SearchFormValues } from "@/lib/api/search";
 
@@ -127,12 +128,7 @@ export default function SearchForm() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-semibold">도면 이미지 (준비 중)</span>
-            <div className="flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-[#C9CDD3] bg-[#F7F8FA] text-sm text-[#6B7280]">
-              이미지 검색은 이후 단계에서 지원됩니다
-            </div>
-          </div>
+          <ImageDescribe currentText={form.text} onApply={(text) => setForm((f) => ({ ...f, text: text.slice(0, 2000) }))} />
         </section>
 
         {/* 오른쪽: 검색 조건 */}
