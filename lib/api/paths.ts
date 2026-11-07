@@ -1,7 +1,5 @@
 /**
- * API 경로를 한곳에서 관리한다. 경로가 바뀌면 이 파일만 고친다.
- * 앞에 붙는 /api 는 client.ts에서 자동으로 붙인다.
- * TODO 표시는 공유받은 명세서 요약에 경로가 없어서 임시로 넣은 값이다.
+ * API 경로를 한곳에서 관리한다. 앞에 붙는 /api 는 client.ts에서 자동으로 붙인다.
  */
 export const API_PATHS = {
   health: "/health",
@@ -9,7 +7,7 @@ export const API_PATHS = {
   auth: {
     login: "/auth/login", // TODO
     signup: "/auth/signup", // TODO
-    reissue: "/auth/reissue", // TODO: 토큰 재발급 경로
+    reissue: "/auth/reissue", // TODO
     logout: "/auth/logout", // TODO
     me: "/users/me",
   },
@@ -24,17 +22,30 @@ export const API_PATHS = {
     feedback: (searchId: string | number) => `/searches/${searchId}/feedback`,
   },
 
+  images: {
+    describe: "/images/describe", // POST multipart → 202 jobId
+  },
+
   patents: {
-    detail: (patentId: string) => `/patents/${patentId}`,
-    summary: (patentId: string) => `/patents/${patentId}/summary`,
-    summaryStream: (patentId: string) => `/patents/${patentId}/summary/stream`,
-    passages: (patentId: string) => `/patents/${patentId}/passages`,
+    detail: (patentId: string | number) => `/patents/${patentId}`,
+    summary: (patentId: string | number) => `/patents/${patentId}/summary`,
+    summaryStream: (patentId: string | number) => `/patents/${patentId}/summary/stream`,
+    passages: (patentId: string | number) => `/patents/${patentId}/passages`,
   },
 
   reviews: {
-    list: "/reviews", // TODO
+    list: "/reviews",
+    create: "/reviews",
     detail: (reviewId: string | number) => `/reviews/${reviewId}`,
+    /** POST: 비교표 생성(검토 건의 특허 전부), GET ?patentId=: 특허 한 건의 비교표 */
     comparison: (reviewId: string | number) => `/reviews/${reviewId}/comparison`,
+    /** PATCH: 기준 청구항 변경 */
+    baseClaim: (reviewId: string | number, patentId: string | number) => `/reviews/${reviewId}/comparison/${patentId}`,
+    recheck: (reviewId: string | number, patentId: string | number) =>
+      `/reviews/${reviewId}/comparison/${patentId}/recheck`,
+    row: (reviewId: string | number, rowId: number) => `/reviews/${reviewId}/comparison/rows/${rowId}`,
+    checkItem: (reviewId: string | number, checkItemId: number) =>
+      `/reviews/${reviewId}/comparison/check-items/${checkItemId}`,
     report: (reviewId: string | number) => `/reviews/${reviewId}/report`,
     reportFile: (reviewId: string | number) => `/reviews/${reviewId}/report/file`,
   },

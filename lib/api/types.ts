@@ -1,5 +1,5 @@
 /**
- * API 명세서의 공통 형식. 명세서 원본을 받으면 TODO 표시한 부분을 확인해서 맞춘다.
+ * API 공통 형식. 백엔드 실제 응답(backend-motrex docs/examples, spec-changes.md) 기준.
  */
 
 /** 모든 JSON 응답의 래퍼. 실패하면 data는 null이고 message는 사용자에게 보여줄 한글 문장이다. */
@@ -8,25 +8,25 @@ export interface ApiResponse<T> {
   data: T | null;
 }
 
-/** 비동기 작업 상태. TODO: 실패 상태 이름(FAILED 등)을 명세서에서 확인 */
+/** 비동기 작업 상태 */
 export type JobStatus = "PENDING" | "RUNNING" | "DONE" | "FAILED";
 
 /** GET /jobs/{jobId} 응답 */
 export interface Job {
   jobId: string;
+  type?: string; // COMPARISON · RECHECK · IMAGE_DESCRIBE 등
   status: JobStatus;
-  progress?: number;
-  resultUrl?: string;
-  errorMessage?: string; // TODO: 필드 이름 확인
+  progress: number; // 0~100 (재판정은 0 → 100으로 한 번에 바뀜)
+  resultUrl: string | null; // DONE일 때만. "/api/..." 형태
+  error: string | null; // FAILED일 때만. 화면에 그대로 보여도 되는 문구
 }
 
-/** 커서 기반 목록 응답. TODO: 목록 필드 이름(items 등) 확인 */
+/** 커서 기반 목록 응답 (검토 목록은 목록 이름이 reviews) */
 export interface CursorPage<T> {
   items: T[];
   nextCursor: string | null;
 }
 
-/** 근거 위치. CLAIM = 청구항 번호, PARAGRAPH = 식별번호(단락). TODO: 타입 값 확인 */
 export type CitationType = "CLAIM" | "PARAGRAPH";
 
 export interface Citation {
@@ -34,7 +34,6 @@ export interface Citation {
   ref: string;
 }
 
-/** 근거가 붙은 AI 문장 (요약 항목 등) */
 export interface CitedText {
   text: string;
   citations: Citation[];
@@ -48,3 +47,8 @@ export const VERDICT_LABEL: Record<Verdict, string> = {
   DIFF: "차이",
   CHECK: "확인 필요",
 };
+
+/** resultUrl("/api/...")을 공통 요청 함수용 경로("/...")로 바꾼다 */
+export function stripApiPrefix(url: string): string {
+  return url.replace(/^\/api(?=\/)/, "");
+}
