@@ -25,9 +25,9 @@ export default function Providers({ children }: { children: ReactNode }) {
   );
 
   // 새로고침하면 메모리의 accessToken이 사라지므로, 앱 시작 시 한 번 재발급을 시도한다.
-  // 로그인하지 않은 상태이거나 백엔드가 꺼져 있으면 조용히 실패한다.
+  // 백엔드가 아직 로그인 없는 개발 모드라 꺼 두었다. 로그인 기능이 생기면 .env.local에 NEXT_PUBLIC_AUTH_ENABLED=true
   useEffect(() => {
-    void reissueAccessToken();
+    if (process.env.NEXT_PUBLIC_AUTH_ENABLED === "true") void reissueAccessToken();
   }, []);
 
   return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;

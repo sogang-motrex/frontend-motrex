@@ -1,11 +1,14 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Tag } from "@/components/common/chips";
 import { ApiError } from "@/lib/api";
+import { createReview, requestComparison } from "@/lib/api/compare";
 import { getSearch, MATCH_PATH_LABEL, type FacetView, type HitView, type SearchSort } from "@/lib/api/search";
+import { loadSearchDraft } from "@/lib/searchDraft";
 
 const MAX_COMPARE = 5;
 
@@ -133,6 +136,27 @@ export default function SearchResultView({ searchId }: { searchId: string }) {
   const [kinds, setKinds] = useState<string[]>([]);
   const [sort, setSort] = useState<SearchSort>("RELEVANCE");
   const [selected, setSelected] = useState<string[]>([]);
+  const router = useRouter();
+
+  // 비교 검토 시작: 검토 건 만들기 → 비교표 생성 요청 → 비교 검토 화면으로 이동
+  const startReview = useMutation({
+    mutationFn: async () => {
+      const draft = loadSearchDraft(searchId);
+      const techDescription = (draft?.techDescription || data?.query || "").trim().slice(0, 2000);
+      const numericSearchId = Number(searchId);
+      const { reviewId } = await createReview({
+        techDescription,
+        searchId: Number.isFinite(numericSearchId) ? numericSearchId : undefined,
+        patentIds: selected.map(Number),
+        sensitive: draft?.sensitive ?? false,
+        inputType: draft?.inputType ?? "TEXT",
+        imageDescription: draft?.imageDescription ?? undefined,
+      });
+      const job = await requestComparison(reviewId);
+      return { reviewId, jobId: job.status === "DONE" ? null : job.jobId };
+    },
+    onSuccess: ({ reviewId, jobId }) => router.push(jobId ? `/reviews/${reviewId}?jobId=${jobId}` : `/reviews/${reviewId}`),
+  });
 
   // facets는 반환된 결과 안에서 센 값이므로, 필터도 받은 결과 안에서 적용한다.
   const visibleHits = useMemo(() => {
@@ -260,15 +284,20 @@ export default function SearchResultView({ searchId }: { searchId: string }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
           <span className="text-sm text-[#F4F5F7]">
             <b>{selected.length}건</b> 선택됨 · 비교는 최대 {MAX_COMPARE}건
+            {startReview.error && (
+              <span className="ml-3 text-[#F6B4A8]">
+                {startReview.error instanceof ApiError ? startReview.error.message : "검토 건을 만들지 못했습니다."}
+              </span>
+            )}
           </span>
-          {selected.length > 0 ? (
-            // TODO: 검토 건 생성 API가 나오면 선택한 patentId로 검토 건을 만든 뒤 이동
-            <Link href="/reviews/demo" className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#1E2633]">
-              비교 검토 시작 →
-            </Link>
-          ) : (
-            <span className="rounded-lg bg-white/30 px-5 py-2.5 text-sm font-bold text-[#1E2633]">비교 검토 시작 →</span>
-          )}
+          <button
+            type="button"
+            onClick={() => startReview.mutate()}
+            disabled={selected.length === 0 || startReview.isPending}
+            className="rounded-lg bg-white px-5 py-2.5 text-sm font-bold text-[#1E2633] disabled:opacity-40"
+          >
+            {startReview.isPending ? "검토 건 만드는 중…" : "비교 검토 시작 →"}
+          </button>
         </div>
       </div>
     </div>

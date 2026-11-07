@@ -1,3 +1,4 @@
+import type { InputType } from "@/lib/searchDraft";
 import { api } from "./client";
 import { API_PATHS } from "./paths";
 
@@ -26,12 +27,10 @@ export interface SearchFormValues {
   ipc: string;
 }
 
-/**
- * POST /api/search 요청 본문.
- * TODO: query · keywords · filters 안의 필드 이름을 명세서 예시와 대조해 맞추기.
- */
+/** POST /api/search 요청 본문 */
 export interface SearchRequest {
-  query: string;
+  query: string; // 2000자 이내
+  inputType?: InputType; // TEXT · IMAGE(도면 설명만) · MIXED(도면 설명 + 직접 쓴 글)
   keywords?: string[];
   filters?: {
     countries?: string[];
@@ -49,7 +48,12 @@ export interface SearchRequest {
  * - expression: 직접 수정 미지원이라 값이 있으면 400 → 보내지 않음
  * - 비어 있는 조건은 아예 빼서 "전체"로 검색
  */
-export function buildSearchRequest(form: SearchFormValues, sort: SearchSort = "RELEVANCE", size = 20): SearchRequest {
+export function buildSearchRequest(
+  form: SearchFormValues,
+  sort: SearchSort = "RELEVANCE",
+  size = 20,
+  inputType: InputType = "TEXT",
+): SearchRequest {
   const filters: NonNullable<SearchRequest["filters"]> = {};
   if (form.countries.length) filters.countries = form.countries;
   if (form.kinds.length) filters.kinds = form.kinds;
@@ -57,7 +61,8 @@ export function buildSearchRequest(form: SearchFormValues, sort: SearchSort = "R
   if (form.ipc.trim()) filters.ipcs = [form.ipc.trim()];
 
   return {
-    query: form.text.trim(),
+    query: form.text.trim().slice(0, 2000),
+    inputType,
     keywords: form.keywords.length ? form.keywords : undefined,
     filters: Object.keys(filters).length ? filters : undefined,
     sort,
@@ -84,7 +89,7 @@ export interface RawMatch {
 }
 
 export interface RawHit {
-  patentId: string | number;
+  patentId: string | number; // 우리 DB 특허 ID (숫자로 옴)
   publicationNumber: string;
   title: string;
   applicant?: string | null;
@@ -104,7 +109,7 @@ type RawFacetList = { value?: string; key?: string; count: number }[] | Record<s
 export interface RawSearchResult {
   searchId: string | number;
   query?: string | null;
-  patents?: RawHit[]; // TODO: 목록 필드 이름 확인 (results / items 등)
+  patents?: RawHit[];
   facets?: {
     countries?: RawFacetList;
     kinds?: RawFacetList;
@@ -245,8 +250,12 @@ export function normalizeSearchResult(raw: RawSearchResult): SearchResultView {
 /* ------------------------------------------------------------------ */
 
 /** POST /api/search: 검색을 실행하고 searchId를 돌려받는다. 당분간 로그인 없이 호출. */
-export async function runSearch(form: SearchFormValues, sort: SearchSort = "RELEVANCE"): Promise<RawSearchResult> {
-  return api.post<RawSearchResult>(API_PATHS.search.run, buildSearchRequest(form, sort), { skipAuth: true });
+export async function runSearch(
+  form: SearchFormValues,
+  inputType: InputType = "TEXT",
+  sort: SearchSort = "RELEVANCE",
+): Promise<RawSearchResult> {
+  return api.post<RawSearchResult>(API_PATHS.search.run, buildSearchRequest(form, sort, 20, inputType), { skipAuth: true });
 }
 
 /** GET /api/searches/{searchId}: 저장된 결과를 다시 본다 (재검색 안 함). */
