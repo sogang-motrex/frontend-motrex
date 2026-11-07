@@ -1,14 +1,10 @@
 /**
- * 비교표(SCR-04) 데이터.
- * 형식은 AI 서버 /ai/compare · /ai/recheck 실제 응답(ai-motrex docs/examples)과 같다.
- * 백엔드 API가 나오기 전까지는 lib/mock/compare/ 의 예시 파일을 가짜 데이터로 쓴다.
+ * 검토 건 · 비교표 · 재판정 API.
+ * 형식은 backend-motrex docs/examples 의 실제 응답과 spec-changes.md 기준.
  */
-import checkRequest from "@/lib/mock/compare/compare_request.json";
-import checkResponse from "@/lib/mock/compare/compare_response.json";
-import sameRequest from "@/lib/mock/compare/compare_same_request.json";
-import sameResponse from "@/lib/mock/compare/compare_same_response.json";
-import recheckRequest from "@/lib/mock/compare/recheck_request.json";
-import recheckResponse from "@/lib/mock/compare/recheck_response.json";
+import type { InputType } from "@/lib/searchDraft";
+import { ApiError, api, apiRequestWithStatus } from "./client";
+import { API_PATHS } from "./paths";
 
 /* ------------------------------------------------------------------ */
 /* 타입                                                                */
@@ -16,8 +12,20 @@ import recheckResponse from "@/lib/mock/compare/recheck_response.json";
 
 export type Verdict = "SAME" | "DIFF" | "CHECK";
 export type ConditionStatus = "SUPPORTED" | "UNCERTAIN" | "INSUFFICIENT" | "CONTRADICTED";
+export type ComparisonStatus = "NONE" | "PENDING" | "RUNNING" | "DONE" | "FAILED" | "STALE";
 
-/** 우리 기술 쪽 근거. DESCRIPTION은 techDescription 기준, ANSWER는 그 답변 글 기준 위치 */
+export interface VerdictSummary {
+  same: number;
+  check: number;
+  diff: number;
+}
+
+export interface UserRef {
+  userId: number;
+  name: string;
+}
+
+/** 우리 기술 쪽 근거. DESCRIPTION은 기술 설명 기준, ANSWER는 그 답변 글 기준 위치 */
 export interface EvidenceFact {
   factId: string;
   source: "DESCRIPTION" | "ANSWER";
@@ -36,7 +44,7 @@ export interface CompareCondition {
   conditionId: string;
   type: string;
   claimQuote: string;
-  start: number; // claimText 기준
+  start: number; // baseClaimText 기준
   end: number;
   status: ConditionStatus;
   statusKo: string;
@@ -47,69 +55,159 @@ export interface CompareCondition {
 }
 
 export interface CompareRow {
-  elementId: string;
+  rowId: number;
   elementLabel: string;
-  kind: string;
-  text: string;
-  start: number; // claimText 기준
+  claimText: string;
+  start: number; // baseClaimText 기준
   end: number;
-  verdict: Verdict;
-  label: string; // 확인 · 부분확인 · 미확인 · 상충
-  counterpart: string | null;
-  counterpartStatus: string; // STATED · ASSUMED · NONE
-  designEvidence: EvidenceFact[];
+  verdict: Verdict; // 검토자가 고쳤으면 고친 값
+  label: string; // AI 라벨: 확인 · 부분확인 · 미확인 · 상충
   aiNote: string;
-  notices: string[];
+  counterpart: string | null;
+  counterpartStatus: "STATED" | "ASSUMED" | "NONE";
+  designEvidence: EvidenceFact[];
   conditions: CompareCondition[];
+  notices: string[];
+  reviewerMemo: string | null;
+  edited: boolean;
+  editedBy: UserRef | null;
 }
 
 export interface CheckItem {
-  questionId: string;
-  elementLabel: string;
+  checkItemId: number; // 질문의 고정 ID (questionId는 재판정 뒤 바뀜)
+  content: string;
+  checked: boolean;
+  questionId: string | null;
   conditionIds: string[];
-  kind: string; // CONDITION · ALIGNMENT · DISAGREE
-  text: string;
+  kind: string; // CONDITION · ALIGNMENT · DISAGREE · EQUIVALENCE
+  answerable: boolean;
+  answer: string | null;
+  answeredBy: UserRef | null;
+  answeredAt: string | null;
 }
 
 export interface AlignmentItem {
   claimName: string;
   inputName: string | null;
-  status: string;
+  status: "STATED" | "ASSUMED" | "NONE";
 }
 
-export interface CompareResponse {
-  docId: string;
-  claimNo: number;
-  claimRef: string;
-  claimText: string;
-  level: string;
-  retrieval: string;
-  summary: Record<Verdict, number>;
+export interface SavedAnswer {
+  answerId: number;
+  questionId: string | null;
+  conditionIds: string[];
+  answer: string;
+  answeredBy: UserRef | null;
+  answeredAt: string;
+  checkItemId: number | null;
+}
+
+/** GET /reviews/{id}/comparison?patentId= (200) */
+export interface Comparison {
+  reviewId: number;
+  patentId: number;
+  status: ComparisonStatus;
+  baseClaimNo: string;
+  baseClaimText: string;
+  verdictSummary: VerdictSummary;
   rows: CompareRow[];
   checkItems: CheckItem[];
   alignment: AlignmentItem[];
   alignmentNotes: string[];
-  answers: EvidenceFact[];
-  llmCalls: number;
-  elapsedMs: number;
-  cached: boolean;
+  answers: SavedAnswer[];
+  generatedAt: string | null;
+  error: string | null;
 }
 
-export interface CompareRequest {
-  docId: string;
-  claimNo: number;
-  techDescription: string;
+/**
+ * GET /reviews/{id} 응답.
+ * TODO: 실제 응답 예시를 받아 필드 이름 확인 (특허 번호·제목·기술 설명 필드)
+ */
+export interface ReviewPatent {
+  patentId: number;
+  publicationNumber?: string;
+  title?: string;
+  comparisonStatus: ComparisonStatus;
+  verdictSummary: VerdictSummary | null;
+}
+
+export interface ReviewDetail {
+  reviewId: number;
+  title: string;
+  techDescription?: string;
   sensitive: boolean;
-  level: string;
-  retrieval: string;
-  alignment?: AlignmentItem[] | null;
-  answers?: AnswerInput[];
+  comparisonStatus?: ComparisonStatus;
+  staleComparisonCount?: number;
+  patents: ReviewPatent[];
 }
 
-export interface AnswerInput {
-  questionId: string;
-  conditionIds: string[];
-  answer: string;
+export interface CreateReviewRequest {
+  title?: string;
+  techDescription: string;
+  searchId?: number;
+  patentIds: number[];
+  sensitive?: boolean;
+  inputType?: InputType;
+  imageDescription?: string;
+}
+
+export interface JobAccepted {
+  jobId: string;
+  status: string;
+}
+
+export interface RecheckRequest {
+  answers?: { checkItemId: number; answer: string }[];
+  alignment?: AlignmentItem[];
+}
+
+/* ------------------------------------------------------------------ */
+/* API                                                                 */
+/* ------------------------------------------------------------------ */
+
+/** POST /reviews → 201 { reviewId } */
+export function createReview(body: CreateReviewRequest): Promise<{ reviewId: number }> {
+  return api.post<{ reviewId: number }>(API_PATHS.reviews.create, body);
+}
+
+/** GET /reviews/{id}: 검토 건 상세 (특허 탭, 민감 여부, 기술 설명) */
+export function getReview(reviewId: string | number): Promise<ReviewDetail> {
+  return api.get<ReviewDetail>(API_PATHS.reviews.detail(reviewId));
+}
+
+/** POST /reviews/{id}/comparison: 검토 건의 특허 전부를 한 작업으로 생성 → 202 jobId (재사용이면 바로 DONE) */
+export function requestComparison(
+  reviewId: string | number,
+  baseClaims?: { patentId: number; baseClaimNo: string }[],
+): Promise<JobAccepted> {
+  return api.post<JobAccepted>(API_PATHS.reviews.comparison(reviewId), baseClaims ? { baseClaims } : undefined);
+}
+
+export type ComparisonResult =
+  | { state: "READY"; data: Comparison } // 200 (DONE, 또는 FAILED + 이전 행)
+  | { state: "GENERATING"; jobId: string } // 202
+  | { state: "NONE" } // 404 아직 생성 안 됨
+  | { state: "STALE"; message: string }; // 409 다시 생성 필요
+
+/** GET /reviews/{id}/comparison?patentId=: 상태 코드별로 나눠서 돌려준다 */
+export async function getComparison(reviewId: string | number, patentId: number): Promise<ComparisonResult> {
+  try {
+    const res = await apiRequestWithStatus<Comparison | JobAccepted>(API_PATHS.reviews.comparison(reviewId), {
+      method: "GET",
+      query: { patentId },
+    });
+    if (res.status === 202) return { state: "GENERATING", jobId: (res.data as JobAccepted).jobId };
+    return { state: "READY", data: res.data as Comparison };
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return { state: "NONE" };
+    if (error instanceof ApiError && error.status === 409) return { state: "STALE", message: error.message };
+    throw error;
+  }
+}
+
+/** POST /reviews/{id}/comparison/{patentId}/recheck → 202 jobId (약 3~4분) */
+export function requestRecheck(reviewId: string | number, patentId: number, body: RecheckRequest): Promise<JobAccepted> {
+  return api.post<JobAccepted>(API_PATHS.reviews.recheck(reviewId, patentId), body);
 }
 
 /* ------------------------------------------------------------------ */
@@ -122,11 +220,20 @@ export const VERDICT_META: Record<Verdict, { ko: string; className: string }> = 
   CHECK: { ko: "확인 필요", className: "bg-[#F6E7C8] text-[#7A4E0B]" },
 };
 
-export const STATUS_META: Record<ConditionStatus, string> = {
-  SUPPORTED: "border-[#1E3A5F] bg-[#E8EEF6] text-[#1E3A5F]",
-  UNCERTAIN: "border-[#C2410C] bg-[#FDF0E4] text-[#9A3412]",
-  INSUFFICIENT: "border-[#C9CDD3] bg-[#F4F5F7] text-[#4B5563]",
-  CONTRADICTED: "border-[#9E3324] bg-[#FBEDEA] text-[#8F2D1F]",
+export const STATUS_META: Record<ConditionStatus, { ko: string; className: string }> = {
+  SUPPORTED: { ko: "확인", className: "border-[#1E3A5F] bg-[#E8EEF6] text-[#1E3A5F]" },
+  UNCERTAIN: { ko: "판정 보류", className: "border-[#C2410C] bg-[#FDF0E4] text-[#9A3412]" },
+  INSUFFICIENT: { ko: "근거 부족", className: "border-[#C9CDD3] bg-[#F4F5F7] text-[#4B5563]" },
+  CONTRADICTED: { ko: "상충", className: "border-[#9E3324] bg-[#FBEDEA] text-[#8F2D1F]" },
+};
+
+export const COMPARISON_STATUS_KO: Record<ComparisonStatus, string> = {
+  NONE: "생성 전",
+  PENDING: "대기 중",
+  RUNNING: "생성 중",
+  DONE: "완료",
+  FAILED: "실패",
+  STALE: "다시 생성 필요",
 };
 
 export const CONDITION_TYPE_KO: Record<string, string> = {
@@ -139,6 +246,7 @@ export const CONDITION_TYPE_KO: Record<string, string> = {
   TIMING: "시점",
   TRANSMIT: "전달",
   WOUND: "감김",
+  POSITION: "위치",
 };
 
 export const FLAG_KO: Record<string, string> = {
@@ -152,6 +260,13 @@ export const CHECK_KIND_KO: Record<string, string> = {
   CONDITION: "조건 확인",
   ALIGNMENT: "부품 대응",
   DISAGREE: "판정 불일치",
+  EQUIVALENCE: "균등 검토",
+};
+
+export const ALIGN_STATUS_KO: Record<AlignmentItem["status"], string> = {
+  STATED: "이름 같음",
+  ASSUMED: "역할 같다고 가정",
+  NONE: "대응 없음",
 };
 
 /** "internal:모델명(alt)" → 판정자 B */
@@ -159,91 +274,10 @@ export function judgeName(judge: string): string {
   return judge.endsWith("(alt)") ? "판정자 B" : "판정자 A";
 }
 
-/* ------------------------------------------------------------------ */
-/* 가짜 데이터 (백엔드 API 연결 전)                                      */
-/* ------------------------------------------------------------------ */
-
-export type CompareScenario = "same" | "check";
-
-interface Scenario {
-  label: string;
-  request: CompareRequest;
-  response: CompareResponse;
-  recheck?: CompareResponse;
-  sampleAnswers?: AnswerInput[];
-}
-
-export const SCENARIOS: Record<CompareScenario, Scenario> = {
-  same: {
-    label: "SAME 섞인 예 (벨트 방식, 1e 텐션모듈만 확인 필요)",
-    request: sameRequest as unknown as CompareRequest,
-    response: sameResponse as unknown as CompareResponse,
-  },
-  check: {
-    label: "재판정 예 (랙·피니언 방식, 5행 모두 확인 필요)",
-    request: checkRequest as unknown as CompareRequest,
-    response: checkResponse as unknown as CompareResponse,
-    recheck: recheckResponse as unknown as CompareResponse,
-    sampleAnswers: (recheckRequest as unknown as CompareRequest).answers,
-  },
-};
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-/** 비교표 조회. TODO: 백엔드 API 확정 후 GET /api/reviews/{reviewId}/comparison 등으로 교체 */
-export async function getComparison(scenario: CompareScenario) {
-  await delay(400);
-  const s = SCENARIOS[scenario];
-  return { request: s.request, response: s.response };
-}
-
-/** /ai/recheck 요청 본문: 처음 요청 + 현재 부품 대응 + 답변 */
-export function buildRecheckRequest(
-  request: CompareRequest,
-  response: CompareResponse,
-  answers: AnswerInput[],
-): CompareRequest {
-  return { ...request, alignment: response.alignment, answers };
-}
-
-/* 재판정 작업 흉내: 실제로는 202 + jobId → GET /api/jobs/{jobId} */
-interface MockJob {
-  startedAt: number;
-  durationMs: number;
-  result: CompareResponse;
-}
-const mockJobs = new Map<string, MockJob>();
-
-export interface RecheckJobState {
-  status: "RUNNING" | "DONE" | "FAILED";
-  progress: number;
-  result?: CompareResponse;
-}
-
-/** 재판정 요청. TODO: 백엔드 API 확정 후 실제 호출로 교체 (202 + jobId) */
-export async function startRecheck(
-  scenario: CompareScenario,
-  request: CompareRequest,
-  response: CompareResponse,
-  answers: AnswerInput[],
-): Promise<{ jobId: string }> {
-  const body = buildRecheckRequest(request, response, answers);
-  console.info("[mock] 재판정 요청 본문", body);
-  await delay(300);
-  const jobId = `mock-${Date.now()}`;
-  mockJobs.set(jobId, {
-    startedAt: Date.now(),
-    durationMs: 6000,
-    result: SCENARIOS[scenario].recheck ?? response,
-  });
-  return { jobId };
-}
-
-/** 재판정 작업 상태. TODO: GET /api/jobs/{jobId} 로 교체 (hooks/useJob 재사용) */
-export async function getRecheckJob(jobId: string): Promise<RecheckJobState> {
-  const job = mockJobs.get(jobId);
-  if (!job) return { status: "FAILED", progress: 0 };
-  const ratio = Math.min(1, (Date.now() - job.startedAt) / job.durationMs);
-  if (ratio >= 1) return { status: "DONE", progress: 100, result: job.result };
-  return { status: "RUNNING", progress: Math.round(ratio * 100) };
+/** 확인 질문이 어느 행의 것인지: 조건 ID로 찾고, 없으면 questionId 앞부분(1e-Q2 → 1e)으로 */
+export function rowLabelOf(item: CheckItem, rows: CompareRow[]): string | null {
+  for (const row of rows) {
+    if (row.conditions.some((c) => item.conditionIds.includes(c.conditionId))) return row.elementLabel;
+  }
+  return item.questionId?.split("-")[0] ?? null;
 }

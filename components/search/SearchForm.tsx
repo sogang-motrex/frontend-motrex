@@ -6,6 +6,7 @@ import { useMemo, useState, type KeyboardEvent } from "react";
 import ImageDescribe from "@/components/search/ImageDescribe";
 import { ApiError } from "@/lib/api";
 import { COUNTRY_OPTIONS, KIND_OPTIONS, runSearch, type SearchFormValues } from "@/lib/api/search";
+import { saveSearchDraft, type InputType } from "@/lib/searchDraft";
 
 const EMPTY_FORM: SearchFormValues = {
   text: "",
@@ -25,10 +26,22 @@ export default function SearchForm() {
   const router = useRouter();
   const [form, setForm] = useState<SearchFormValues>(EMPTY_FORM);
   const [keywordInput, setKeywordInput] = useState("");
+  const [sensitive, setSensitive] = useState(false);
+  const [inputType, setInputType] = useState<InputType>("TEXT");
+  const [imageDraft, setImageDraft] = useState<string | null>(null);
 
   const search = useMutation({
-    mutationFn: () => runSearch(form),
-    onSuccess: (data) => router.push(`/searches/${data.searchId}`),
+    mutationFn: () => runSearch(form, inputType),
+    onSuccess: (data) => {
+      // 검토 건을 만들 때 필요한 값을 검색 번호별로 보관
+      saveSearchDraft(data.searchId, {
+        techDescription: form.text.trim(),
+        inputType,
+        imageDescription: imageDraft,
+        sensitive,
+      });
+      router.push(`/searches/${data.searchId}`);
+    },
   });
 
   const canSubmit = (form.text.trim().length > 0 || form.keywords.length > 0) && !search.isPending;
@@ -128,7 +141,20 @@ export default function SearchForm() {
             </div>
           </div>
 
-          <ImageDescribe currentText={form.text} onApply={(text) => setForm((f) => ({ ...f, text: text.slice(0, 2000) }))} />
+          <ImageDescribe
+            currentText={form.text}
+            onDescribed={() => setSensitive(true)}
+            onApply={(text, mode) => {
+              setImageDraft(text);
+              if (mode === "append") {
+                setInputType("MIXED");
+                setForm((f) => ({ ...f, text: `${f.text.trim()}\n${text}`.slice(0, 2000) }));
+              } else {
+                setInputType("IMAGE");
+                setForm((f) => ({ ...f, text: text.slice(0, 2000) }));
+              }
+            }}
+          />
         </section>
 
         {/* 오른쪽: 검색 조건 */}
@@ -211,6 +237,21 @@ export default function SearchForm() {
         </div>
       </section>
 
+      <label className="flex items-start gap-2 rounded-lg border border-[#C9CDD3] bg-white px-4 py-3 text-sm">
+        <input
+          type="checkbox"
+          checked={sensitive}
+          onChange={(e) => setSensitive(e.target.checked)}
+          className="mt-0.5 h-4 w-4"
+        />
+        <span>
+          <b>민감 주제</b> · 사내 기밀이나 미공개 설계가 포함되어 있어요
+          <span className="block text-xs text-[#6B7280]">
+            체크하면 비교·재판정에 내부 AI 모델만 써요. 도면을 올리면 자동으로 켜져요.
+          </span>
+        </span>
+      </label>
+
       {errorMessage && (
         <p role="alert" className="rounded-lg border border-[#E7B4AC] bg-[#FBEDEA] px-4 py-3 text-sm text-[#8F2D1F]">
           {errorMessage}
@@ -223,6 +264,9 @@ export default function SearchForm() {
           onClick={() => {
             setForm(EMPTY_FORM);
             setKeywordInput("");
+            setSensitive(false);
+            setInputType("TEXT");
+            setImageDraft(null);
             search.reset();
           }}
           className="rounded-lg border border-[#C9CDD3] bg-white px-6 py-3 text-sm font-semibold"
