@@ -41,6 +41,8 @@ export const API_PATHS = {
     comparison: (reviewId: string | number) => `/reviews/${reviewId}/comparison`,
     /** PATCH: 기준 청구항 변경 */
     baseClaim: (reviewId: string | number, patentId: string | number) => `/reviews/${reviewId}/comparison/${patentId}`,
+    /** GET ?format=docx|pdf: 비교 자료 파일 (변리사 의뢰용) */
+    comparisonFile: (reviewId: string | number) => `/reviews/${reviewId}/comparison/file`,
     recheck: (reviewId: string | number, patentId: string | number) =>
       `/reviews/${reviewId}/comparison/${patentId}/recheck`,
     row: (reviewId: string | number, rowId: number) => `/reviews/${reviewId}/comparison/rows/${rowId}`,
