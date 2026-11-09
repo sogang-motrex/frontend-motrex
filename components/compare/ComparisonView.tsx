@@ -820,7 +820,7 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                     답변으로 다시 판단
                   </button>
                   <Link href={`/reviews/${reviewId}/report`} className="rounded-lg border border-white/40 px-4 py-2 font-semibold">
-                    보고서 생성 →
+                    비교 자료 내보내기 →
                   </Link>
                 </div>
               </div>
