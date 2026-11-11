@@ -27,18 +27,24 @@ export default function SearchForm() {
   const [form, setForm] = useState<SearchFormValues>(EMPTY_FORM);
   const [keywordInput, setKeywordInput] = useState("");
   const [sensitive, setSensitive] = useState(false);
-  const [inputType, setInputType] = useState<InputType>("TEXT");
+  // 사용자 글(form.text)과 확인한 도면 글을 따로 보관한다
   const [imageDraft, setImageDraft] = useState<string | null>(null);
+  const [imageDescriptionId, setImageDescriptionId] = useState<number | null>(null);
   const [imagePending, setImagePending] = useState(false); // 도면 설명을 아직 확인하지 않음
   const [imageKey, setImageKey] = useState(0); // 초기화할 때 도면 영역도 처음 상태로
 
+  const userText = form.text.trim();
+  const inputType: InputType = imageDraft ? (userText ? "MIXED" : "IMAGE") : "TEXT";
+
   const search = useMutation({
-    mutationFn: () => runSearch(form, inputType),
+    // 검색 query는 사용자 글 + 도면 글을 합쳐 보낸다 (검색 query 2,000자 제한은 buildSearchRequest에서 자름)
+    mutationFn: () => runSearch({ ...form, text: [userText, imageDraft].filter(Boolean).join("\n\n") }, inputType),
     onSuccess: (data) => {
-      // 검토 건을 만들 때 필요한 값을 검색 번호별로 보관
+      // 검토 건을 만들 때 필요한 값을 검색 번호별로 보관 (사용자 글과 도면 글은 따로)
       saveSearchDraft(data.searchId, {
-        techDescription: form.text.trim(),
+        techDescription: userText,
         inputType,
+        imageDescriptionId,
         imageDescription: imageDraft,
         sensitive,
       });
@@ -46,7 +52,8 @@ export default function SearchForm() {
     },
   });
 
-  const canSubmit = (form.text.trim().length > 0 || form.keywords.length > 0) && !search.isPending && !imagePending;
+  const canSubmit =
+    (userText.length > 0 || Boolean(imageDraft) || form.keywords.length > 0) && !search.isPending && !imagePending;
 
   const addKeyword = () => {
     const word = keywordInput.trim();
@@ -109,7 +116,10 @@ export default function SearchForm() {
               className="resize-none rounded-lg border border-[#C9CDD3] p-3 text-sm outline-none focus:border-[#1E3A5F]"
               placeholder="예) 차량 대시보드에 장착된 디스플레이 패널이 모터로 회전하며 각도를 조절하는 구조"
             />
-            <span className="self-end text-xs text-[#6B7280]">{form.text.length} / 2,000자</span>
+            <span className="flex justify-between text-xs text-[#6B7280]">
+              <span>도면 설명은 아래에서 따로 확인해요</span>
+              <span>{form.text.length} / 2,000자</span>
+            </span>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -145,19 +155,12 @@ export default function SearchForm() {
 
           <ImageDescribe
             key={imageKey}
-            currentText={form.text}
             onDescribed={() => setSensitive(true)}
             onPendingChange={setImagePending}
-            onConfirm={(text, mode) => {
-              // TODO: 확인한 도면 설명 저장 API가 정해지면 여기서 저장 (김도의 공유 예정)
+            onConfirm={(text, descriptionId) => {
+              // 확정은 검토 건을 만든 뒤 PUT /reviews/{id}/image-description/confirmed 로 보낸다
               setImageDraft(text);
-              if (mode === "append") {
-                setInputType("MIXED");
-                setForm((f) => ({ ...f, text: `${f.text.trim()}\n${text}`.slice(0, 2000) }));
-              } else {
-                setInputType("IMAGE");
-                setForm((f) => ({ ...f, text: text.slice(0, 2000) }));
-              }
+              setImageDescriptionId(descriptionId);
             }}
           />
         </section>
@@ -271,8 +274,8 @@ export default function SearchForm() {
             setForm(EMPTY_FORM);
             setKeywordInput("");
             setSensitive(false);
-            setInputType("TEXT");
             setImageDraft(null);
+            setImageDescriptionId(null);
             setImagePending(false);
             setImageKey((k) => k + 1);
             search.reset();

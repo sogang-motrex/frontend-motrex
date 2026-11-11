@@ -1,7 +1,7 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
-import { getComparison, judgeLabel, type Comparison, type ReviewDetail, type Verdict } from "@/lib/api/compare";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import { getComparison, getReviewImageDescription, hasExternalJudge, mergeTechText, judgeLabel, type Comparison, type ReviewDetail, type Verdict } from "@/lib/api/compare";
 
 /**
  * 모트렉스 보고서 문서 디자인 시트(MOTREX_검토_보고서_템플릿) 형식의 검토 보고서 미리보기.
@@ -71,6 +71,10 @@ const today = () => new Date().toISOString().slice(0, 10);
 
 export default function MotrexReport({ review }: { review: ReviewDetail }) {
   const patents = review.patents.filter((p) => p.comparisonStatus === "DONE");
+  const imageDesc = useQuery({
+    queryKey: ["review-image-description", String(review.reviewId)],
+    queryFn: () => getReviewImageDescription(review.reviewId),
+  });
   const results = useQueries({
     queries: patents.map((p) => ({
       queryKey: ["comparison", String(review.reviewId), p.patentId],
@@ -90,8 +94,8 @@ export default function MotrexReport({ review }: { review: ReviewDetail }) {
   const count = (v: Verdict) => rows.filter((r) => r.verdict === v).length;
   const questions = comparisons.flatMap((c) => c.data.checkItems);
   const unanswered = questions.filter((q) => q.answerable && !q.answer).length;
-  const external = comparisons.some((c) => judgeLabel(c.data.judge)?.includes("GPT"));
-  const routeText = review.sensitive || !external ? "사내 모델만 사용 (외부 전송 없음)" : "외부 모델(GPT) + 사내 모델";
+  const external = comparisons.some((c) => hasExternalJudge(c.data.judge));
+  const routeText = review.sensitive || !external ? "사내 모델만 사용 (외부 전송 없음)" : "외부 모델 + 사내 모델";
 
   return (
     <article className="mx">
@@ -135,7 +139,9 @@ export default function MotrexReport({ review }: { review: ReviewDetail }) {
         <h2>
           <span className="n">01</span>검토 대상 기술 설명
         </h2>
-        <p className="desc">{review.techDescription ?? "기술 설명 없음"}</p>
+        <p className="desc" style={{ whiteSpace: "pre-wrap" }}>
+          {mergeTechText(review.techDescription, imageDesc.data?.confirmed?.description) || "기술 설명 없음"}
+        </p>
       </section>
 
       <section>

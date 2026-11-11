@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Tag } from "@/components/common/chips";
 import { ApiError } from "@/lib/api";
-import { createReview, requestComparison } from "@/lib/api/compare";
+import { confirmImageDescription, createReview, requestComparison } from "@/lib/api/compare";
 import { getSearch, MATCH_PATH_LABEL, type FacetView, type HitView, type SearchSort } from "@/lib/api/search";
 import { loadSearchDraft } from "@/lib/searchDraft";
 
@@ -138,11 +138,13 @@ export default function SearchResultView({ searchId }: { searchId: string }) {
   const [selected, setSelected] = useState<string[]>([]);
   const router = useRouter();
 
-  // 비교 검토 시작: 검토 건 만들기 → 비교표 생성 요청 → 비교 검토 화면으로 이동
+  // 비교 검토 시작: ① 검토 건 만들기 → ② 확인한 도면 설명 확정 → ③ 비교표 생성 요청 → 비교 검토 화면으로 이동
   const startReview = useMutation({
     mutationFn: async () => {
       const draft = loadSearchDraft(searchId);
-      const techDescription = (draft?.techDescription || data?.query || "").trim().slice(0, 2000);
+      const hasImage = Boolean(draft?.imageDescriptionId && draft.imageDescription);
+      // 사용자 글만 보낸다 (도면 글은 서버가 합친다). 2,000자 자르기는 사용자 글에만
+      const techDescription = (draft ? draft.techDescription : (data?.query ?? "")).trim().slice(0, 2000);
       const numericSearchId = Number(searchId);
       const { reviewId } = await createReview({
         techDescription,
@@ -150,8 +152,9 @@ export default function SearchResultView({ searchId }: { searchId: string }) {
         patentIds: selected.map(Number),
         sensitive: draft?.sensitive ?? false,
         inputType: draft?.inputType ?? "TEXT",
-        imageDescription: draft?.imageDescription ?? undefined,
+        imageDescriptionId: hasImage ? (draft?.imageDescriptionId ?? undefined) : undefined,
       });
+      if (hasImage) await confirmImageDescription(reviewId, draft!.imageDescription!);
       const job = await requestComparison(reviewId);
       return { reviewId, jobId: job.status === "DONE" ? null : job.jobId };
     },

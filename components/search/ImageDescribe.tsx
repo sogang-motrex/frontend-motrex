@@ -11,24 +11,22 @@ import {
   type ImageDescribeResult,
 } from "@/lib/api/imageDescribe";
 
-export type ApplyMode = "replace" | "append";
-
 /** 이름이 비어 있는 부품: name이 "부호 115"처럼 "부호"로 시작 */
 const isUnnamed = (name: string) => name.trim().startsWith("부호");
 
 /**
  * SCR-01 도면 업로드 → 설명 확인.
  * AI 초안을 바로 검색칸에 넣지 않고, 사용자가 고치고 "확인"을 눌러야 검색·비교에 쓰인다.
+ * 확인한 도면 글은 사용자가 쓴 기술 설명과 따로 보관한다 (검토 건 생성 후 서버에 확정).
  * 로컬 모델이 이름 없는 부호(115, 120 등)에 부품명을 지어낼 수 있어서다.
  */
 export default function ImageDescribe({
-  currentText,
   onConfirm,
   onDescribed,
   onPendingChange,
 }: {
-  currentText: string;
-  onConfirm: (text: string, mode: ApplyMode) => void;
+  /** 확인한 도면 글과 도면 설명 결과 ID. 다시 고치기 시작하면 (null, null) */
+  onConfirm: (text: string | null, descriptionId: number | null) => void;
   onDescribed: (result: ImageDescribeResult) => void;
   /** 확인 전 초안이 있는지 (있으면 검색을 막는다) */
   onPendingChange: (pending: boolean) => void;
@@ -88,6 +86,7 @@ export default function ImageDescribe({
     setJobId(null);
     setConfirmed(false);
     onPendingChange(false);
+    onConfirm(null, null);
     start.mutate({ file, memo: hint });
   };
 
@@ -106,8 +105,9 @@ export default function ImageDescribe({
     setApplied((a) => ({ ...a, [code]: name }));
   };
 
-  const confirm = (mode: ApplyMode) => {
-    onConfirm(draft.trim(), mode);
+  const confirm = () => {
+    if (!result.data) return;
+    onConfirm(draft.trim(), result.data.descriptionId);
     setConfirmed(true);
     onPendingChange(false);
   };
@@ -180,12 +180,16 @@ export default function ImageDescribe({
 
       {data && confirmed && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-[#9DB3CF] bg-[#F2F6FB] px-4 py-3 text-sm">
-          <span className="font-semibold text-[#1E3A5F]">✓ 확인한 도면 설명을 기술 설명에 넣었어요.</span>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="font-semibold text-[#1E3A5F]">✓ 확인한 도면 설명 · 검색과 비교에 함께 쓰여요</span>
+            <span className="line-clamp-2 text-xs text-[#374151]">{draft}</span>
+          </div>
           <button
             type="button"
             onClick={() => {
               setConfirmed(false);
               onPendingChange(true);
+              onConfirm(null, null);
             }}
             className="text-xs font-semibold text-[#1E3A5F] underline"
           >
@@ -274,23 +278,13 @@ export default function ImageDescribe({
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             {pendingCodes > 0 && <span className="text-xs text-[#9A5F0C]">이름을 넣지 않은 부호 {pendingCodes}개가 남아 있어요</span>}
-            {currentText.trim() && (
-              <button
-                type="button"
-                onClick={() => confirm("append")}
-                disabled={!draft.trim()}
-                className="rounded-md border border-[#9DB3CF] bg-white px-4 py-2 text-xs font-semibold disabled:opacity-40"
-              >
-                확인 · 기존 설명 뒤에 덧붙이기
-              </button>
-            )}
             <button
               type="button"
-              onClick={() => confirm("replace")}
+              onClick={confirm}
               disabled={!draft.trim()}
               className="rounded-md bg-[#1E3A5F] px-5 py-2 text-xs font-bold text-white disabled:opacity-40"
             >
-              {currentText.trim() ? "확인 · 이 설명으로 바꾸기" : "확인"}
+              확인
             </button>
           </div>
         </div>
