@@ -117,12 +117,12 @@ export interface Comparison {
   answers: SavedAnswer[];
   generatedAt: string | null;
   error: string | null;
-  /** 판정 모델 경로. external = 외부(GPT), internal = 사내 Qwen */
+  /** 판정 모델. route: external = GPT, internal = 사내 Qwen, claude = Claude. 변경 전 비교표는 null, 판정자 1명이면 j2 null */
   judge?: { j1?: JudgeInfo | null; j2?: JudgeInfo | null } | null;
 }
 
 export interface JudgeInfo {
-  route: "external" | "internal" | string;
+  route: "external" | "internal" | "claude" | string;
   model?: string;
 }
 
@@ -155,7 +155,8 @@ export interface CreateReviewRequest {
   patentIds: number[];
   sensitive?: boolean;
   inputType?: InputType;
-  imageDescription?: string;
+  /** 도면 설명 결과 ID. 확정한 글은 PUT /reviews/{id}/image-description/confirmed로 따로 보낸다 (imageDescription을 같이 보내면 400) */
+  imageDescriptionId?: number;
 }
 
 export interface JobAccepted {
@@ -221,15 +222,72 @@ export function markReviewSensitive(reviewId: string | number): Promise<{ staleC
   return api.patch<{ staleComparisonCount?: number } | null>(API_PATHS.reviews.detail(reviewId), { sensitive: true });
 }
 
-/** 판정 모델 표시: "판정: GPT + 사내 Qwen" 또는 "판정: 사내 Qwen만 (외부 전송 없음)" */
+/** route → 화면 이름 */
+const JUDGE_NAME: Record<string, string> = { external: "GPT", internal: "사내 Qwen", claude: "Claude" };
+
+function judges(judge: Comparison["judge"]): JudgeInfo[] {
+  return [judge?.j1, judge?.j2].filter((j): j is JudgeInfo => Boolean(j?.route));
+}
+
+/** 외부 모델(GPT·Claude)로 판정했는지 */
+export function hasExternalJudge(judge: Comparison["judge"]): boolean {
+  return judges(judge).some((j) => j.route !== "internal");
+}
+
+/**
+ * 판정 모델 표시: "판정: GPT + 사내 Qwen", "판정: Claude + 사내 Qwen", "판정: 사내 Qwen만 (외부 전송 없음)".
+ * judge가 null(변경 전 비교표)이면 null → 화면에서 숨김
+ */
 export function judgeLabel(judge: Comparison["judge"]): string | null {
-  const routes = [judge?.j1?.route, judge?.j2?.route].filter((r): r is string => Boolean(r));
-  if (routes.length === 0) return null;
-  const hasExternal = routes.includes("external");
-  const hasInternal = routes.includes("internal");
-  if (hasExternal && hasInternal) return "판정: GPT + 사내 Qwen";
-  if (hasExternal) return "판정: GPT";
-  return "판정: 사내 Qwen만 (외부 전송 없음)";
+  const list = judges(judge);
+  if (list.length === 0) return null;
+  if (!hasExternalJudge(judge)) return "판정: 사내 Qwen만 (외부 전송 없음)";
+  const names = Array.from(new Set(list.map((j) => JUDGE_NAME[j.route] ?? j.route)));
+  return `판정: ${names.join(" + ")}`;
+}
+
+/** 툴팁용 실제 모델 이름 */
+export function judgeModels(judge: Comparison["judge"]): string {
+  return [judge?.j1 && `판정자 A: ${judge.j1.model ?? judge.j1.route}`, judge?.j2 && `판정자 B: ${judge.j2.model ?? judge.j2.route}`]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/**
+ * 확인한 도면 설명 확정: PUT /reviews/{id}/image-description/confirmed
+ * 비교 AI에 보내는 글(사용자 글 + 빈 줄 + 확정 도면 글)은 서버가 합친다.
+ */
+export function confirmImageDescription(
+  reviewId: string | number,
+  description: string,
+): Promise<ReviewImageDescription> {
+  return api.put<ReviewImageDescription>(API_PATHS.reviews.imageDescriptionConfirmed(reviewId), { description });
+}
+
+/** GET /reviews/{id}/image-description. 확정 전이면 confirmed가 null이고 status가 DRAFT (초안은 비교에 안 쓰임) */
+export interface ReviewImageDescription {
+  status: "DRAFT" | "CONFIRMED" | string;
+  confirmed: { description: string } | null;
+  /** 확정 글에 민감 키워드가 있으면 서버가 민감으로 올림 */
+  sensitive?: boolean;
+}
+
+/** 검토 건의 확정 도면 글. 도면을 쓰지 않은 검토 건(404)이면 null */
+export async function getReviewImageDescription(reviewId: string | number): Promise<ReviewImageDescription | null> {
+  try {
+    return await api.get<ReviewImageDescription>(API_PATHS.reviews.imageDescription(reviewId));
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+/**
+ * 비교 AI가 받은 글을 서버와 똑같이 만든다 (근거 하이라이트 위치가 이 글 기준).
+ * 각각 앞뒤 공백을 지우고, 둘 다 있으면 "사용자 글\n\n확정 글", 한쪽만 있으면 그 글만.
+ */
+export function mergeTechText(userText?: string | null, confirmedText?: string | null): string {
+  return [userText?.trim(), confirmedText?.trim()].filter((t): t is string => Boolean(t)).join("\n\n");
 }
 
 /** ALIGNMENT 질문에서 청구항 부품 이름 꺼내기: "청구항의 'Y'…" → Y */

@@ -17,9 +17,12 @@ import {
   getComparison,
   claimNameOf,
   getReview,
+  getReviewImageDescription,
   judgeLabel,
+  judgeModels,
   judgeName,
   markReviewSensitive,
+  mergeTechText,
   requestComparison,
   requestRecheck,
   rowLabelOf,
@@ -424,6 +427,11 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
   const queryClient = useQueryClient();
 
   const review = useQuery({ queryKey: ["review", reviewId], queryFn: () => getReview(reviewId) });
+  // 확정 도면 글 (비교 AI에 사용자 글과 합쳐 들어간 글)
+  const imageDesc = useQuery({
+    queryKey: ["review-image-description", reviewId],
+    queryFn: () => getReviewImageDescription(reviewId),
+  });
   const patents = review.data?.patents ?? [];
   const [activePatentId, setActivePatentId] = useState<number | null>(null);
   const patentId = activePatentId ?? patents[0]?.patentId ?? null;
@@ -593,7 +601,8 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
   }
 
   const sensitive = review.data?.sensitive ?? false;
-  const techDescription = review.data?.techDescription ?? "";
+  // 비교 AI가 받은 글 = 서버와 같은 규칙으로 합친 글 (근거 위치가 이 글 기준)
+  const techDescription = mergeTechText(review.data?.techDescription, imageDesc.data?.confirmed?.description);
   const generating = Boolean(genJobId) && genJob.data?.status !== "FAILED";
   const rechecking = Boolean(recheckJobId) || recheck.isPending;
 
@@ -777,7 +786,8 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
               <span className="text-sm font-semibold">기준 청구항 {data.baseClaimNo}</span>
               {judgeLabel(data.judge) && (
                 <span
-                  className={`text-sm font-semibold ${
+                  title={judgeModels(data.judge)}
+                  className={`w-fit cursor-help text-sm font-semibold ${
                     judgeLabel(data.judge)?.includes("외부 전송 없음") ? "text-[#0B7671]" : "text-[#374151]"
                   }`}
                 >
