@@ -41,6 +41,10 @@ export const API_PATHS = {
     comparison: (reviewId: string | number) => `/reviews/${reviewId}/comparison`,
     /** PATCH: 기준 청구항 변경 */
     baseClaim: (reviewId: string | number, patentId: string | number) => `/reviews/${reviewId}/comparison/${patentId}`,
+    /** GET: 검토 건의 도면 설명 (status, confirmed.description) */
+    imageDescription: (reviewId: string | number) => `/reviews/${reviewId}/image-description`,
+    /** PUT { description }: 확인한 도면 설명 확정 */
+    imageDescriptionConfirmed: (reviewId: string | number) => `/reviews/${reviewId}/image-description/confirmed`,
     /** GET ?format=docx|pdf: 비교 자료 파일 (변리사 의뢰용) */
     comparisonFile: (reviewId: string | number) => `/reviews/${reviewId}/comparison/file`,
     recheck: (reviewId: string | number, patentId: string | number) =>

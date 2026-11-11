@@ -6,8 +6,11 @@
 export type InputType = "TEXT" | "IMAGE" | "MIXED";
 
 export interface SearchDraft {
+  /** 사용자가 직접 쓴 글만 (비어도 됨) */
   techDescription: string;
   inputType: InputType;
+  /** 도면 설명 결과 ID와 사용자가 확인한 도면 글 */
+  imageDescriptionId: number | null;
   imageDescription: string | null;
   sensitive: boolean;
 }
