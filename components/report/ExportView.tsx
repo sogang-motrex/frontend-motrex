@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ApiError } from "@/lib/api";
 import { COMPARISON_STATUS_KO, VERDICT_META, getReview, type Verdict, type VerdictSummary } from "@/lib/api/compare";
 import { downloadComparisonFile, type ExportFormat } from "@/lib/api/export";
+import MotrexReport from "@/components/report/MotrexReport";
 
 const FORMATS: { format: ExportFormat; title: string; desc: string }[] = [
   { format: "docx", title: "Word (.docx)", desc: "내용을 고쳐서 쓰거나 메모를 더할 때" },
@@ -172,12 +173,28 @@ export default function ExportView({ reviewId }: { reviewId: string }) {
         <p className="text-xs text-[#6B7280]">모트렉스 양식을 받으면 같은 내용이 그 양식으로 바뀌어요.</p>
       </section>
 
-      <section className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-[#9CA3AF] bg-white p-5">
-        <div>
-          <h2 className="font-bold text-[#4B5563]">보고서 문장 초안</h2>
-          <p className="text-sm text-[#6B7280]">AI가 비교표를 바탕으로 보고서 문장을 써 주는 기능은 다음 단계에서 열려요.</p>
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold">검토 보고서 미리보기 · 모트렉스 양식</h2>
+            <p className="text-sm text-[#6B7280]">비교표 데이터로 모트렉스 보고서 디자인 시트 형식에 맞춰 만든 화면이에요. 인쇄 메뉴에서 PDF로도 저장할 수 있어요.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            disabled={!ready}
+            className="rounded-lg border border-[#1E3A5F] px-4 py-2 text-sm font-bold text-[#1E3A5F] disabled:opacity-40"
+          >
+            보고서 인쇄 · PDF 저장
+          </button>
         </div>
-        <span className="rounded bg-[#EEF0F3] px-2 py-1 text-xs text-[#4B5563]">준비 중</span>
+        {ready ? (
+          <MotrexReport review={review.data} />
+        ) : (
+          <p className="rounded-xl border border-dashed border-[#9CA3AF] bg-white p-6 text-sm text-[#4B5563]">
+            모든 특허의 비교표가 완료되면 보고서를 볼 수 있어요.
+          </p>
+        )}
       </section>
     </div>
   );

@@ -117,6 +117,13 @@ export interface Comparison {
   answers: SavedAnswer[];
   generatedAt: string | null;
   error: string | null;
+  /** 판정 모델 경로. external = 외부(GPT), internal = 사내 Qwen */
+  judge?: { j1?: JudgeInfo | null; j2?: JudgeInfo | null } | null;
+}
+
+export interface JudgeInfo {
+  route: "external" | "internal" | string;
+  model?: string;
 }
 
 /**
@@ -203,6 +210,31 @@ export async function getComparison(reviewId: string | number, patentId: number)
     if (error instanceof ApiError && error.status === 409) return { state: "STALE", message: error.message };
     throw error;
   }
+}
+
+/**
+ * 검토 건을 민감으로 바꾸기 (올리기만 가능).
+ * 외부 경로로 만든 비교표는 다시 생성 필요(STALE)가 되고, 개수(staleComparisonCount)가 온다.
+ * TODO: 경로·본문을 백엔드 명세로 확인 (PATCH /reviews/{id} { sensitive: true } 로 가정)
+ */
+export function markReviewSensitive(reviewId: string | number): Promise<{ staleComparisonCount?: number } | null> {
+  return api.patch<{ staleComparisonCount?: number } | null>(API_PATHS.reviews.detail(reviewId), { sensitive: true });
+}
+
+/** 판정 모델 표시: "판정: GPT + 사내 Qwen" 또는 "판정: 사내 Qwen만 (외부 전송 없음)" */
+export function judgeLabel(judge: Comparison["judge"]): string | null {
+  const routes = [judge?.j1?.route, judge?.j2?.route].filter((r): r is string => Boolean(r));
+  if (routes.length === 0) return null;
+  const hasExternal = routes.includes("external");
+  const hasInternal = routes.includes("internal");
+  if (hasExternal && hasInternal) return "판정: GPT + 사내 Qwen";
+  if (hasExternal) return "판정: GPT";
+  return "판정: 사내 Qwen만 (외부 전송 없음)";
+}
+
+/** ALIGNMENT 질문에서 청구항 부품 이름 꺼내기: "청구항의 'Y'…" → Y */
+export function claimNameOf(content: string): string | null {
+  return content.match(/청구항의\s*'([^']+)'/)?.[1] ?? content.match(/'([^']+)'/)?.[1] ?? null;
 }
 
 /** POST /reviews/{id}/comparison/{patentId}/recheck → 202 jobId (약 3~4분) */

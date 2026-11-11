@@ -29,6 +29,8 @@ export default function SearchForm() {
   const [sensitive, setSensitive] = useState(false);
   const [inputType, setInputType] = useState<InputType>("TEXT");
   const [imageDraft, setImageDraft] = useState<string | null>(null);
+  const [imagePending, setImagePending] = useState(false); // 도면 설명을 아직 확인하지 않음
+  const [imageKey, setImageKey] = useState(0); // 초기화할 때 도면 영역도 처음 상태로
 
   const search = useMutation({
     mutationFn: () => runSearch(form, inputType),
@@ -44,7 +46,7 @@ export default function SearchForm() {
     },
   });
 
-  const canSubmit = (form.text.trim().length > 0 || form.keywords.length > 0) && !search.isPending;
+  const canSubmit = (form.text.trim().length > 0 || form.keywords.length > 0) && !search.isPending && !imagePending;
 
   const addKeyword = () => {
     const word = keywordInput.trim();
@@ -142,9 +144,12 @@ export default function SearchForm() {
           </div>
 
           <ImageDescribe
+            key={imageKey}
             currentText={form.text}
             onDescribed={() => setSensitive(true)}
-            onApply={(text, mode) => {
+            onPendingChange={setImagePending}
+            onConfirm={(text, mode) => {
+              // TODO: 확인한 도면 설명 저장 API가 정해지면 여기서 저장 (김도의 공유 예정)
               setImageDraft(text);
               if (mode === "append") {
                 setInputType("MIXED");
@@ -258,7 +263,8 @@ export default function SearchForm() {
         </p>
       )}
 
-      <div className="flex justify-end gap-3">
+      <div className="flex items-center justify-end gap-3">
+        {imagePending && <span className="text-sm text-[#9A5F0C]">도면 설명을 확인해야 검색할 수 있어요</span>}
         <button
           type="button"
           onClick={() => {
@@ -267,6 +273,8 @@ export default function SearchForm() {
             setSensitive(false);
             setInputType("TEXT");
             setImageDraft(null);
+            setImagePending(false);
+            setImageKey((k) => k + 1);
             search.reset();
           }}
           className="rounded-lg border border-[#C9CDD3] bg-white px-6 py-3 text-sm font-semibold"

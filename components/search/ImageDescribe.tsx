@@ -13,26 +13,37 @@ import {
 
 export type ApplyMode = "replace" | "append";
 
+/** 이름이 비어 있는 부품: name이 "부호 115"처럼 "부호"로 시작 */
+const isUnnamed = (name: string) => name.trim().startsWith("부호");
+
 /**
- * SCR-01 도면 업로드: 이미지를 올리면 AI가 기술 설명 초안을 써서 입력칸에 채운다 (약 47초, 같은 그림은 캐시로 바로).
- * 입력칸이 비어 있으면 바로 채우고, 이미 글이 있으면 바꿀지 덧붙일지 고르게 한다.
- * 도면은 서버에 저장되지 않고, 미리보기는 브라우저에서만 보여 준다.
+ * SCR-01 도면 업로드 → 설명 확인.
+ * AI 초안을 바로 검색칸에 넣지 않고, 사용자가 고치고 "확인"을 눌러야 검색·비교에 쓰인다.
+ * 로컬 모델이 이름 없는 부호(115, 120 등)에 부품명을 지어낼 수 있어서다.
  */
 export default function ImageDescribe({
   currentText,
-  onApply,
+  onConfirm,
   onDescribed,
+  onPendingChange,
 }: {
   currentText: string;
-  onApply: (text: string, mode: ApplyMode) => void;
+  onConfirm: (text: string, mode: ApplyMode) => void;
   onDescribed: (result: ImageDescribeResult) => void;
+  /** 확인 전 초안이 있는지 (있으면 검색을 막는다) */
+  onPendingChange: (pending: boolean) => void;
 }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [hint, setHint] = useState("");
   const [fileError, setFileError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
-  const [applied, setApplied] = useState(false);
+
+  // 확인 화면 상태
+  const [draft, setDraft] = useState("");
+  const [names, setNames] = useState<Record<string, string>>({}); // "부호 115" → 입력한 이름
+  const [applied, setApplied] = useState<Record<string, string>>({}); // 설명에 반영한 이름
+  const [confirmed, setConfirmed] = useState(false);
 
   const start = useMutation({
     mutationFn: ({ file, memo }: { file: File; memo: string }) => requestImageDescribe(file, memo),
@@ -49,14 +60,15 @@ export default function ImageDescribe({
     staleTime: Infinity,
   });
 
-  // 결과가 처음 도착했을 때: 민감 주제 체크를 켜고, 입력칸이 비어 있으면 바로 채운다
+  // 결과가 도착하면 확인 화면을 연다 (민감 주제는 자동으로 켬)
   useEffect(() => {
     if (!result.data) return;
     onDescribed(result.data);
-    if (!currentText.trim()) {
-      onApply(result.data.description, "replace");
-      setApplied(true);
-    }
+    setDraft(result.data.description);
+    setNames({});
+    setApplied({});
+    setConfirmed(false);
+    onPendingChange(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.data]);
 
@@ -73,8 +85,9 @@ export default function ImageDescribe({
     setFileError(problem);
     if (problem) return;
     setPreview(URL.createObjectURL(file));
-    setApplied(false);
     setJobId(null);
+    setConfirmed(false);
+    onPendingChange(false);
     start.mutate({ file, memo: hint });
   };
 
@@ -82,6 +95,21 @@ export default function ImageDescribe({
     e.preventDefault();
     setDragging(false);
     handleFile(e.dataTransfer.files?.[0]);
+  };
+
+  /** 이름 없는 부호를 입력한 이름으로 설명 안에서 바꾼다 */
+  const applyName = (code: string) => {
+    const name = (names[code] ?? "").trim();
+    if (!name) return;
+    const from = applied[code] ?? code;
+    setDraft((d) => d.split(from).join(name));
+    setApplied((a) => ({ ...a, [code]: name }));
+  };
+
+  const confirm = (mode: ApplyMode) => {
+    onConfirm(draft.trim(), mode);
+    setConfirmed(true);
+    onPendingChange(false);
   };
 
   const working = start.isPending || (Boolean(jobId) && !resultUrl && job.data?.status !== "FAILED") || result.isLoading;
@@ -92,6 +120,9 @@ export default function ImageDescribe({
     (result.error instanceof ApiError ? result.error.message : null);
 
   const data = result.data;
+  const unnamed = data?.parts.filter((p) => isUnnamed(p.name)) ?? [];
+  const named = data?.parts.filter((p) => !isUnnamed(p.name)) ?? [];
+  const pendingCodes = unnamed.filter((p) => !applied[p.name]).length;
 
   return (
     <div className="flex flex-col gap-2">
@@ -141,51 +172,76 @@ export default function ImageDescribe({
         maxLength={2000}
         onChange={(e) => setHint(e.target.value)}
         disabled={working}
-        placeholder="도면 메모 (선택) · 예) 차량 대시보드 디스플레이 인출 구조 단면도"
+        placeholder="도면 메모 (선택) · 예) 차량 터치 패널 입력 장치 단면도"
         className="rounded-lg border border-[#C9CDD3] px-3 py-2 text-sm"
       />
 
       {error && <p className="text-sm text-[#8F2D1F]">{error}</p>}
 
-      {data && (
-        <div className="flex flex-col gap-3 rounded-lg border border-[#9DB3CF] bg-[#F2F6FB] p-3 text-sm">
-          {applied ? (
-            <p className="font-semibold text-[#1E3A5F]">AI 설명 초안을 위 입력칸에 넣었어요. 필요하면 고쳐서 검색하세요.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <p className="font-semibold text-[#1E3A5F]">AI 설명 초안이 준비됐어요. 이미 입력한 설명이 있어요.</p>
-              <p className="rounded-md bg-white p-2 leading-relaxed">{data.description}</p>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onApply(data.description, "replace");
-                    setApplied(true);
-                  }}
-                  className="rounded-md bg-[#1E3A5F] px-3 py-1.5 text-xs font-bold text-white"
-                >
-                  초안으로 바꾸기
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onApply(data.description, "append");
-                    setApplied(true);
-                  }}
-                  className="rounded-md border border-[#9DB3CF] bg-white px-3 py-1.5 text-xs font-semibold"
-                >
-                  뒤에 덧붙이기
-                </button>
-              </div>
+      {data && confirmed && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-[#9DB3CF] bg-[#F2F6FB] px-4 py-3 text-sm">
+          <span className="font-semibold text-[#1E3A5F]">✓ 확인한 도면 설명을 기술 설명에 넣었어요.</span>
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmed(false);
+              onPendingChange(true);
+            }}
+            className="text-xs font-semibold text-[#1E3A5F] underline"
+          >
+            다시 고치기
+          </button>
+        </div>
+      )}
+
+      {data && !confirmed && (
+        <div className="flex flex-col gap-4 rounded-lg border-2 border-[#1E3A5F] bg-white p-4 text-sm">
+          <div>
+            <p className="font-bold text-[#1E3A5F]">도면 설명 확인</p>
+            <p className="mt-1 text-xs text-[#4B5563]">
+              AI 초안이에요. 그림에 이름이 없는 부호는 AI가 이름을 지어낼 수 있으니, 고친 뒤 <b>확인</b>을 눌러야 검색에 쓰여요.
+            </p>
+          </div>
+
+          {unnamed.length > 0 && (
+            <div className="flex flex-col gap-2 rounded-lg border border-[#E7C38A] bg-[#FDF6EA] p-3">
+              <p className="font-semibold text-[#9A5F0C]">이름이 없는 부호 {unnamed.length}개 · 부품 이름을 입력해 주세요</p>
+              {unnamed.map((p) => (
+                <div key={p.name} className="flex flex-wrap items-center gap-2">
+                  <span className="w-24 shrink-0 font-mono font-bold text-[#9A5F0C]">{p.name}</span>
+                  <span className="min-w-0 flex-1 text-xs text-[#4B5563]">{p.role}</span>
+                  <input
+                    value={names[p.name] ?? ""}
+                    onChange={(e) => setNames((n) => ({ ...n, [p.name]: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyName(p.name);
+                      }
+                    }}
+                    placeholder="부품 이름"
+                    className="w-40 rounded border border-[#E7C38A] bg-white px-2 py-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => applyName(p.name)}
+                    disabled={!(names[p.name] ?? "").trim()}
+                    className="rounded bg-[#9A5F0C] px-3 py-1 text-xs font-bold text-white disabled:opacity-40"
+                  >
+                    {applied[p.name] ? "다시 바꾸기" : "설명에 반영"}
+                  </button>
+                  {applied[p.name] && <span className="text-xs text-[#1E3A5F]">✓ {applied[p.name]}</span>}
+                </div>
+              ))}
             </div>
           )}
 
-          {data.parts.length > 0 && (
+          {named.length > 0 && (
             <div className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-[#374151]">AI가 찾은 부품</span>
               <div className="flex flex-wrap gap-1.5">
-                {data.parts.map((p) => (
-                  <span key={p.name} title={p.role} className="rounded bg-white px-2 py-0.5 text-xs">
+                {named.map((p) => (
+                  <span key={p.name} title={p.role} className="rounded bg-[#F1F3F6] px-2 py-0.5 text-xs">
                     {p.name}
                   </span>
                 ))}
@@ -193,9 +249,21 @@ export default function ImageDescribe({
             </div>
           )}
 
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold text-[#374151]">설명 (직접 고칠 수 있어요)</span>
+            <textarea
+              value={draft}
+              maxLength={2000}
+              rows={6}
+              onChange={(e) => setDraft(e.target.value)}
+              className="resize-y rounded-md border border-[#C9CDD3] p-3 leading-relaxed outline-none focus:border-[#1E3A5F]"
+            />
+            <span className="self-end text-xs text-[#6B7280]">{draft.length} / 2,000자</span>
+          </label>
+
           {data.uncertain.length > 0 && (
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-semibold text-[#9A3412]">그림만으로 알 수 없는 점 · 설명에 보완해 주세요</span>
+              <span className="text-xs font-semibold text-[#9A5F0C]">그림만으로 알 수 없는 점 · 알고 있다면 설명에 보완해 주세요 (선택)</span>
               <ul className="list-disc pl-5 text-[#374151]">
                 {data.uncertain.map((u) => (
                   <li key={u}>{u}</li>
@@ -203,6 +271,28 @@ export default function ImageDescribe({
               </ul>
             </div>
           )}
+
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {pendingCodes > 0 && <span className="text-xs text-[#9A5F0C]">이름을 넣지 않은 부호 {pendingCodes}개가 남아 있어요</span>}
+            {currentText.trim() && (
+              <button
+                type="button"
+                onClick={() => confirm("append")}
+                disabled={!draft.trim()}
+                className="rounded-md border border-[#9DB3CF] bg-white px-4 py-2 text-xs font-semibold disabled:opacity-40"
+              >
+                확인 · 기존 설명 뒤에 덧붙이기
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => confirm("replace")}
+              disabled={!draft.trim()}
+              className="rounded-md bg-[#1E3A5F] px-5 py-2 text-xs font-bold text-white disabled:opacity-40"
+            >
+              {currentText.trim() ? "확인 · 이 설명으로 바꾸기" : "확인"}
+            </button>
+          </div>
         </div>
       )}
     </div>

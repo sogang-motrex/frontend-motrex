@@ -15,8 +15,11 @@ import {
   STATUS_META,
   VERDICT_META,
   getComparison,
+  claimNameOf,
   getReview,
+  judgeLabel,
   judgeName,
+  markReviewSensitive,
   requestComparison,
   requestRecheck,
   rowLabelOf,
@@ -141,13 +144,16 @@ function QuestionItem({
   draft,
   locked,
   onChange,
+  onEditAlignment,
 }: {
   item: CheckItem;
   draft: string;
   locked: boolean;
   onChange: (value: string) => void;
+  onEditAlignment: (claimName: string | null) => void;
 }) {
-  const canAnswer = item.answerable && item.kind !== "EQUIVALENCE";
+  const isAlignment = item.kind === "ALIGNMENT";
+  const canAnswer = item.answerable && item.kind !== "EQUIVALENCE" && !isAlignment;
   return (
     <li className="flex flex-col gap-2 rounded-lg border border-[#F1D9B5] bg-[#FFFBF5] p-3">
       <div className="flex items-start gap-2">
@@ -166,7 +172,19 @@ function QuestionItem({
         </p>
       )}
 
-      {canAnswer ? (
+      {isAlignment ? (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-[#6B7280]">부품 대응 질문은 답변 글로는 다시 판단되지 않아요. 대응 부품을 지정하거나 확인해 주세요.</p>
+          <button
+            type="button"
+            disabled={locked}
+            onClick={() => onEditAlignment(claimNameOf(item.content))}
+            className="shrink-0 rounded-md bg-[#1E3A5F] px-3 py-1.5 text-xs font-bold text-white disabled:opacity-40"
+          >
+            부품 대응 수정
+          </button>
+        </div>
+      ) : canAnswer ? (
         <textarea
           rows={2}
           maxLength={2000}
@@ -203,6 +221,7 @@ function RowCard({
   onToggle,
   onSelectCondition,
   onDraft,
+  onEditAlignment,
 }: {
   row: CompareRow;
   open: boolean;
@@ -215,6 +234,7 @@ function RowCard({
   onToggle: () => void;
   onSelectCondition: (conditionId: string) => void;
   onDraft: (checkItemId: number, value: string) => void;
+  onEditAlignment: (claimName: string | null) => void;
 }) {
   return (
     <article className={`rounded-xl bg-white ${selected ? "border-2 border-[#1E3A5F]" : "border border-[#C9CDD3]"}`}>
@@ -289,6 +309,7 @@ function RowCard({
                     draft={drafts[q.checkItemId] ?? q.answer ?? ""}
                     locked={locked}
                     onChange={(v) => onDraft(q.checkItemId, v)}
+                    onEditAlignment={onEditAlignment}
                   />
                 ))}
               </ul>
@@ -308,16 +329,22 @@ function AlignmentPanel({
   items,
   drafts,
   locked,
+  open,
+  focusName,
+  onToggle,
   onChange,
 }: {
   items: AlignmentItem[];
   drafts: Record<string, AlignmentItem>;
   locked: boolean;
+  open: boolean;
+  focusName: string | null;
+  onToggle: () => void;
   onChange: (item: AlignmentItem) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const setOpen = (_: unknown) => onToggle();
   return (
-    <section className="rounded-xl border border-[#C9CDD3] bg-white">
+    <section id="alignment-panel" className="scroll-mt-24 rounded-xl border border-[#C9CDD3] bg-white">
       <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between p-4 text-left">
         <span className="text-sm font-bold">부품 대응 (청구항 부품 ↔ 우리 기술 부품)</span>
         <span className="text-xs text-[#6B7280]">{open ? "▲ 접기" : "▼ 펼쳐서 고치기"}</span>
@@ -339,14 +366,23 @@ function AlignmentPanel({
               {items.map((original) => {
                 const a = drafts[original.claimName] ?? original;
                 return (
-                  <tr key={original.claimName} className="border-t border-[#F1F3F6]">
+                  <tr
+                    key={original.claimName}
+                    className={`border-t border-[#F1F3F6] ${
+                      focusName && original.claimName.includes(focusName) ? "bg-[#FDF6EA]" : ""
+                    }`}
+                  >
                     <td className="py-1.5 pr-2">{original.claimName}</td>
                     <td className="py-1.5 pr-2">
                       <input
                         value={a.inputName ?? ""}
-                        disabled={locked || a.status === "NONE"}
-                        placeholder={a.status === "NONE" ? "대응 없음" : "부품 이름"}
-                        onChange={(e) => onChange({ ...a, inputName: e.target.value || null })}
+                        disabled={locked}
+                        placeholder={a.status === "NONE" ? "대응 없음 · 이름을 쓰면 지정돼요" : "부품 이름"}
+                        onChange={(e) => {
+                          const name = e.target.value || null;
+                          const status = name && a.status === "NONE" ? "ASSUMED" : !name ? "NONE" : a.status;
+                          onChange({ ...a, inputName: name, status });
+                        }}
                         className="w-full rounded border border-[#E6E9ED] px-2 py-1 disabled:bg-[#F7F8FA]"
                       />
                     </td>
@@ -450,6 +486,31 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
   const [answerDrafts, setAnswerDrafts] = useState<Record<number, string>>({});
   const [alignDrafts, setAlignDrafts] = useState<Record<string, AlignmentItem>>({});
+  const [alignOpen, setAlignOpen] = useState(false);
+  const [alignFocus, setAlignFocus] = useState<string | null>(null);
+
+  /** ALIGNMENT 질문의 "부품 대응 수정": 부품 대응 표를 열고 해당 부품 줄로 이동 */
+  const editAlignment = (claimName: string | null) => {
+    setAlignOpen(true);
+    setAlignFocus(claimName);
+    setTimeout(() => document.getElementById("alignment-panel")?.scrollIntoView({ behavior: "smooth" }), 50);
+  };
+
+  /** 검토 건을 민감으로 바꾸기 → 외부 경로 비교표는 다시 생성 필요가 된다 */
+  const [staleNotice, setStaleNotice] = useState<string | null>(null);
+  const makeSensitive = useMutation({
+    mutationFn: () => markReviewSensitive(reviewId),
+    onSuccess: (res) => {
+      const count = res?.staleComparisonCount ?? 0;
+      setStaleNotice(
+        count > 0
+          ? `민감 검토로 바꿨어요. 외부 모델로 만든 비교표 ${count}건은 다시 생성해야 해요.`
+          : "민감 검토로 바꿨어요. 이제 사내 모델만 사용해요.",
+      );
+      queryClient.invalidateQueries({ queryKey: ["review", reviewId] });
+      queryClient.invalidateQueries({ queryKey: ["comparison", reviewId] });
+    },
+  });
 
   /* 재판정 작업 (약 3~4분, progress는 0 → 100) */
   const [recheckJobId, setRecheckJobId] = useState<string | null>(null);
@@ -563,6 +624,8 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
     return d && d !== (q.answer ?? "");
   }).length;
   const alignCount = Object.keys(alignDrafts).length;
+  /** 대응 있음(이름 같음·가정)인데 이름이 빈 줄: 백엔드가 거절하므로 미리 막는다 */
+  const alignMissingName = Object.values(alignDrafts).filter((a) => a.status !== "NONE" && !a.inputName?.trim()).length;
   const recheckError =
     (recheck.error instanceof ApiError ? recheck.error.message : recheck.error ? "다시 판단을 요청하지 못했습니다." : null) ??
     (recheckJob.data?.status === "FAILED" ? (recheckJob.data.error ?? "다시 판단하지 못했습니다.") : null);
@@ -580,14 +643,35 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
       <section className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-bold">{review.data?.title}</h1>
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${
-              sensitive ? "bg-[#1E2633] text-white" : "bg-[#EEF0F3] text-[#374151]"
-            }`}
-          >
-            {sensitive ? "민감 검토 · 내부 AI 모델만 사용" : "일반 검토"}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                sensitive ? "bg-[#1E2633] text-white" : "bg-[#EEF0F3] text-[#374151]"
+              }`}
+            >
+              {sensitive ? "민감 검토 · 내부 AI 모델만 사용" : "일반 검토"}
+            </span>
+            {!sensitive && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.confirm("민감 검토로 바꾸면 되돌릴 수 없고, 외부 모델로 만든 비교표는 다시 생성해야 해요. 바꿀까요?"))
+                    makeSensitive.mutate();
+                }}
+                disabled={makeSensitive.isPending}
+                className="rounded-full border border-[#1E2633] px-3 py-1 text-xs font-semibold disabled:opacity-50"
+              >
+                민감으로 바꾸기
+              </button>
+            )}
+          </div>
         </div>
+        {staleNotice && <p className="rounded-lg bg-[#E6F4F3] px-4 py-2 text-sm text-[#0B7671]">{staleNotice}</p>}
+        {makeSensitive.error && (
+          <p className="rounded-lg bg-[#FBEDEA] px-4 py-2 text-sm text-[#8F2D1F]">
+            {makeSensitive.error instanceof ApiError ? makeSensitive.error.message : "민감 검토로 바꾸지 못했습니다."}
+          </p>
+        )}
         <div className="flex flex-wrap gap-1">
           {patents.map((p) => (
             <button
@@ -689,7 +773,18 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
         <>
 
           <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#C9CDD3] bg-white px-5 py-4">
-            <span className="text-sm font-semibold">기준 청구항 {data.baseClaimNo}</span>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm font-semibold">기준 청구항 {data.baseClaimNo}</span>
+              {judgeLabel(data.judge) && (
+                <span
+                  className={`text-sm font-semibold ${
+                    judgeLabel(data.judge)?.includes("외부 전송 없음") ? "text-[#0B7671]" : "text-[#374151]"
+                  }`}
+                >
+                  {judgeLabel(data.judge)}
+                </span>
+              )}
+            </div>
             <SummaryChips summary={data.verdictSummary} />
           </section>
 
@@ -722,6 +817,7 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                     setSelectedCondition(cid);
                   }}
                   onDraft={(id, v) => setAnswerDrafts((d) => ({ ...d, [id]: v }))}
+                  onEditAlignment={editAlignment}
                 />
               ))}
 
@@ -736,6 +832,7 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                         draft={answerDrafts[q.checkItemId] ?? q.answer ?? ""}
                         locked={rechecking}
                         onChange={(v) => setAnswerDrafts((d) => ({ ...d, [q.checkItemId]: v }))}
+                        onEditAlignment={editAlignment}
                       />
                     ))}
                   </ul>
@@ -746,7 +843,18 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                 items={data.alignment}
                 drafts={alignDrafts}
                 locked={rechecking}
-                onChange={(item) => setAlignDrafts((d) => ({ ...d, [item.claimName]: item }))}
+                open={alignOpen}
+                focusName={alignFocus}
+                onToggle={() => setAlignOpen((v) => !v)}
+                onChange={(item) =>
+                  setAlignDrafts((d) => {
+                    const original = data.alignment.find((x) => x.claimName === item.claimName);
+                    const next = { ...d };
+                    if (original && original.inputName === item.inputName && original.status === item.status) delete next[item.claimName];
+                    else next[item.claimName] = item;
+                    return next;
+                  })
+                }
               />
             </section>
 
@@ -807,6 +915,9 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                 ) : (
                   <span>
                     새 답변 <b>{newAnswerCount}</b>개 · 부품 대응 변경 <b>{alignCount}</b>개
+                    {alignMissingName > 0 && (
+                      <span className="ml-3 text-[#F6C77E]">부품 대응 {alignMissingName}곳에 우리 기술 부품 이름을 입력해 주세요</span>
+                    )}
                     {recheckError && <span className="ml-3 text-[#F6B4A8]">{recheckError}</span>}
                   </span>
                 )}
@@ -814,7 +925,7 @@ export default function ComparisonView({ reviewId, initialJobId }: { reviewId: s
                   <button
                     type="button"
                     onClick={() => recheck.mutate()}
-                    disabled={rechecking || (newAnswerCount === 0 && alignCount === 0)}
+                    disabled={rechecking || (newAnswerCount === 0 && alignCount === 0) || alignMissingName > 0}
                     className="rounded-lg bg-white px-4 py-2 font-bold text-[#1E2633] disabled:opacity-40"
                   >
                     답변으로 다시 판단
