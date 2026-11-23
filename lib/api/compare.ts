@@ -145,6 +145,8 @@ export interface ReviewDetail {
   sensitive: boolean;
   comparisonStatus?: ComparisonStatus;
   staleComparisonCount?: number;
+  /** 특허를 고른 검색 (보고서의 "비교 대상 선정 이유"에 검색 순위와 일치 문장을 쓴다). 검색 없이 추가했으면 null */
+  searchId?: number | null;
   patents: ReviewPatent[];
 }
 
