@@ -345,10 +345,9 @@ function AlignmentPanel({
   onToggle: () => void;
   onChange: (item: AlignmentItem) => void;
 }) {
-  const setOpen = (_: unknown) => onToggle();
   return (
     <section id="alignment-panel" className="scroll-mt-24 rounded-xl border border-[#C9CDD3] bg-white">
-      <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between p-4 text-left">
+      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between p-4 text-left">
         <span className="text-sm font-bold">부품 대응 (청구항 부품 ↔ 우리 기술 부품)</span>
         <span className="text-xs text-[#6B7280]">{open ? "▲ 접기" : "▼ 펼쳐서 고치기"}</span>
       </button>
